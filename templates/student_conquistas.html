@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Conquistas - EduApp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_aulas') }}">
+                            <i class="fas fa-book me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_gamificacao') }}">
+                            <i class="fas fa-gamepad me-2"></i>Gamificação
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_ranking') }}">
+                            <i class="fas fa-trophy me-2"></i>Ranking
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_metas') }}">
+                            <i class="fas fa-bullseye me-2"></i>Metas Semanais
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('student_conquistas') }}">
+                            <i class="fas fa-medal me-2"></i>Conquistas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_progresso') }}">
+                            <i class="fas fa-chart-line me-2"></i>Progresso
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-trophy me-2"></i>Minhas Conquistas
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary"
+                            onclick="filtrarConquistas('todas')">
+                            <i class="fas fa-filter me-1"></i>Todas
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success"
+                            onclick="filtrarConquistas('obtidas')">
+                            <i class="fas fa-check me-1"></i>Obtidas
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning"
+                            onclick="filtrarConquistas('disponiveis')">
+                            <i class="fas fa-clock me-1"></i>Disponíveis
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas das Conquistas -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Conquistas Obtidas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ conquistas_obtidas|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-trophy fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Total de Pontos
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {% set total_pontos = conquistas_obtidas|sum(attribute=3) %}{{ total_pontos }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-star fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Conquistas Disponíveis
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ todas_conquistas|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-gem fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Taxa de Conclusão
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {% if todas_conquistas|length > 0 %}
+                                        {{ ((conquistas_obtidas|length / todas_conquistas|length) * 100)|round(1) }}%
+                                        {% else %}
+                                        0%
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conquistas Obtidas -->
+            {% if conquistas_obtidas %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-trophy me-2"></i>Conquistas Obtidas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for conquista in conquistas_obtidas %}
+                                <div class="col-md-6 col-lg-4 mb-3 conquista-item" data-tipo="obtida">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="fas fa-trophy fa-3x text-success"></i>
+                                            </div>
+                                            <h6 class="card-title text-success">{{ conquista[0] }}</h6>
+                                            <p class="card-text small text-muted">{{ conquista[1] }}</p>
+                                            <div class="mb-2">
+                                                <span class="badge bg-success">{{ conquista[2] }} pontos</span>
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                Obtida em {{ conquista[3] }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Todas as Conquistas Disponíveis -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-gem me-2"></i>Todas as Conquistas Disponíveis
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for conquista in conquistas_progresso %}
+                                <div class="col-md-6 col-lg-4 mb-3 conquista-item"
+                                    data-tipo="{% if conquista.obtida %}obtida{% else %}disponivel{% endif %}">
+                                    <div
+                                        class="card h-100 {% if conquista.obtida %}border-success{% else %}border-warning{% endif %}">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                {% if conquista.obtida %}
+                                                <i class="fas fa-trophy fa-3x text-success"></i>
+                                                {% else %}
+                                                <i class="fas fa-gem fa-3x text-warning"></i>
+                                                {% endif %}
+                                            </div>
+                                            <h6
+                                                class="card-title {% if conquista.obtida %}text-success{% else %}text-warning{% endif %}">
+                                                {{ conquista.conquista[1] }}
+                                            </h6>
+                                            <p class="card-text small text-muted">{{ conquista.conquista[2] }}</p>
+                                            
+                                            <!-- Barra de Progresso para Conquistas -->
+                                            {% if not conquista.obtida and conquista.progresso > 0 %}
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <small class="text-muted">Progresso</small>
+                                                    <small class="text-muted">{{ conquista.progresso }}</small>
+                                                </div>
+                                                <div class="progress" style="height: 8px;">
+                                                    {% if conquista.conquista[5] == 'primeira_aula' %}
+                                                        {% set max_progresso = 1 %}
+                                                    {% elif conquista.conquista[5] == 'cinco_aulas' %}
+                                                        {% set max_progresso = 5 %}
+                                                    {% elif conquista.conquista[5] == 'vinte_aulas' %}
+                                                        {% set max_progresso = 20 %}
+                                                    {% else %}
+                                                        {% set max_progresso = 1 %}
+                                                    {% endif %}
+                                                    {% set percentual = (conquista.progresso / max_progresso * 100) %}
+                                                    <div class="progress-bar bg-info" role="progressbar" 
+                                                         style="width: {{ [percentual, 100] | min }}%"></div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <div class="mb-2">
+                                                <span
+                                                    class="badge {% if conquista.obtida %}bg-success{% else %}bg-warning{% endif %}">
+                                                    {{ conquista.conquista[3] }} pontos
+                                                </span>
+                                            </div>
+                                            
+                                            {% if conquista.conquista[5] %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                {% if conquista.conquista[5] == 'primeira_aula' %}
+                                                    Complete sua primeira aula
+                                                {% elif conquista.conquista[5] == 'cinco_aulas' %}
+                                                    Complete 5 aulas
+                                                {% elif conquista.conquista[5] == 'vinte_aulas' %}
+                                                    Complete 20 aulas
+                                                {% else %}
+                                                    {{ conquista.conquista[5] }}
+                                                {% endif %}
+                                            </small>
+                                            {% endif %}
+                                            
+                                            {% if conquista.obtida %}
+                                            <div class="mt-2">
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Desbloqueada
+                                                </span>
+                                            </div>
+                                            {% else %}
+                                            <div class="mt-2">
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-lock me-1"></i>Bloqueada
+                                                </span>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dicas para Ganhar Conquistas -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>Como Ganhar Mais Conquistas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">📚 Complete Aulas</h6>
+                                    <ul class="small text-muted">
+                                        <li>Assista aos vídeos completos</li>
+                                        <li>Faça todos os exercícios</li>
+                                        <li>Mantenha uma rotina de estudos</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success">🎯 Acumule Pontos</h6>
+                                    <ul class="small text-muted">
+                                        <li>Resposta correta = +10 pontos</li>
+                                        <li>Concluir aula = +50 pontos</li>
+                                        <li>Sequência de dias = +25 pontos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .border-left-success {
+        border-left: 0.25rem solid #28a745 !important;
+    }
+
+    .border-left-warning {
+        border-left: 0.25rem solid #ffc107 !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #17a2b8 !important;
+    }
+
+    .border-left-primary {
+        border-left: 0.25rem solid #007bff !important;
+    }
+
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        border-radius: 0.35rem 0.35rem 0 0 !important;
+        border: none;
+    }
+
+    .conquista-item {
+        transition: all 0.3s ease;
+    }
+
+    .conquista-item.hidden {
+        display: none;
+    }
+
+    .badge {
+        font-size: 0.875em;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+</style>
+
+<script>
+    function filtrarConquistas(tipo) {
+        const conquistas = document.querySelectorAll('.conquista-item');
+
+        conquistas.forEach(conquista => {
+            if (tipo === 'todas') {
+                conquista.classList.remove('hidden');
+            } else if (tipo === 'obtidas') {
+                if (conquista.dataset.tipo === 'obtida') {
+                    conquista.classList.remove('hidden');
+                } else {
+                    conquista.classList.add('hidden');
+                }
+            } else if (tipo === 'disponiveis') {
+                if (conquista.dataset.tipo === 'disponivel') {
+                    conquista.classList.remove('hidden');
+                } else {
+                    conquista.classList.add('hidden');
+                }
+            }
+        });
+
+        // Atualizar botões ativos
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    }
+
+    // Inicializar filtros
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mostrar todas as conquistas por padrão
+        filtrarConquistas('todas');
+    });
+</script>
+{% endblock %}

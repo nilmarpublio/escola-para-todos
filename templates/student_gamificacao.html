@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Gamificação - EduApp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_aulas') }}">
+                            <i class="fas fa-book me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('student_gamificacao') }}">
+                            <i class="fas fa-gamepad me-2"></i>Gamificação
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_ranking') }}">
+                            <i class="fas fa-trophy me-2"></i>Ranking
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_metas') }}">
+                            <i class="fas fa-bullseye me-2"></i>Metas Semanais
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_conquistas') }}">
+                            <i class="fas fa-medal me-2"></i>Conquistas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_progresso') }}">
+                            <i class="fas fa-chart-line me-2"></i>Progresso
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Header -->
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="fas fa-gamepad me-2 text-primary"></i>Gamificação
+                    </h1>
+                    <p class="text-muted mb-0">Complete desafios e suba de nível! 🚀</p>
+                </div>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ url_for('student_ranking') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-trophy me-1"></i>Ver Ranking
+                        </a>
+                        <a href="{{ url_for('student_metas') }}" class="btn btn-primary">
+                            <i class="fas fa-bullseye me-1"></i>Minhas Metas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nível e Progresso -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mb-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-star me-2 text-primary"></i>Seu Nível: {{ nivel_info[4] if nivel_info
+                                else 'Iniciante' }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-3 text-center">
+                                    <div class="display-4 mb-3"
+                                        style="color: {{ nivel_info[5] if nivel_info else '#6c757d' }};">
+                                        <i class="{{ nivel_info[6] if nivel_info else 'fas fa-star' }}"></i>
+                                    </div>
+                                    <h4 class="mb-2" style="color: {{ nivel_info[5] if nivel_info else '#6c757d' }};">
+                                        Nível {{ nivel_info[0] if nivel_info else 1 }}</h4>
+                                    <small class="text-muted">{{ nivel_info[4] if nivel_info else 'Iniciante' }}</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="mb-4">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">Progresso do Nível</span>
+                                            <span class="text-muted">{{ nivel_info[2] if nivel_info else 0 }}/{{
+                                                nivel_info[3] if nivel_info else 100 }} pontos</span>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 12px;">
+                                            <div class="progress-bar" role="progressbar"
+                                                style="width: {{ progresso_nivel }}%; background: linear-gradient(135deg, {{ nivel_info[5] if nivel_info else '#6c757d' }} 0%, {{ nivel_info[5] if nivel_info else '#6c757d' }}80 100%);"
+                                                aria-valuenow="{{ nivel_info[2] if nivel_info else 0 }}"
+                                                aria-valuemin="0"
+                                                aria-valuemax="{{ nivel_info[3] if nivel_info else 100 }}">
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">
+                                            {% if nivel_info and nivel_info[3] and nivel_info[2] %}
+                                            Faltam {{ nivel_info[3] - nivel_info[2] }} pontos para o próximo nível
+                                            {% else %}
+                                            Continue estudando para subir de nível!
+                                            {% endif %}
+                                        </small>
+                                    </div>
+
+                                    <!-- Próximos Níveis -->
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="text-center p-3 border rounded-3">
+                                                <h6 class="mb-1">Próximo Nível</h6>
+                                                <div class="h4 mb-0"
+                                                    style="color: {{ proximo_nivel[5] if proximo_nivel else '#6c757d' }};">
+                                                    {{ proximo_nivel[0] if proximo_nivel else '2' }}
+                                                </div>
+                                                <small class="text-muted">{{ proximo_nivel[4] if proximo_nivel else
+                                                    'Aprendiz' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="text-center p-3 border rounded-3">
+                                                <h6 class="mb-1">Recompensa</h6>
+                                                <div class="h4 mb-0 text-success">
+                                                    +{{ proximo_nivel[7] if proximo_nivel else 50 }}
+                                                </div>
+                                                <small class="text-muted">pontos bônus</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-chart-pie me-2 text-primary"></i>Estatísticas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">Total de Pontos</span>
+                                    <span class="h5 mb-0 text-primary">{{ total_pontos }}</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-primary"
+                                        style="width: {{ (total_pontos / 1000) * 100 }}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">Aulas Concluídas</span>
+                                    <span class="h5 mb-0 text-success">{{ aulas_concluidas }}</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success"
+                                        style="width: {{ (aulas_concluidas / 20) * 100 }}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">Conquistas</span>
+                                    <span class="h5 mb-0 text-warning">{{ conquistas_count }}</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-warning"
+                                        style="width: {{ (conquistas_count / 10) * 100 }}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <div class="bg-light rounded-3 p-3">
+                                    <h6 class="mb-1">Posição no Ranking</h6>
+                                    <div class="h3 mb-0 text-primary">{{ posicao_ranking }}</div>
+                                    <small class="text-muted">de {{ total_alunos }} alunos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conquistas Recentes -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card dashboard-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-medal me-2 text-primary"></i>Conquistas Recentes
+                            </h6>
+                            <a href="{{ url_for('student_conquistas') }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>Ver Todas
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if conquistas %}
+                            <div class="row">
+                                {% for conquista in conquistas[:6] %}
+                                <div class="col-lg-4 col-md-6 mb-3">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body text-center p-4">
+                                            <div class="mb-3">
+                                                <div class="bg-{{ conquista[3] }} rounded-circle d-inline-flex align-items-center justify-content-center"
+                                                    style="width: 80px; height: 80px;">
+                                                    <i class="{{ conquista[4] }} fa-2x text-white"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="card-title mb-2">{{ conquista[0] }}</h6>
+                                            <p class="card-text text-muted small mb-3">{{ conquista[1] }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-{{ conquista[3] }}">{{ conquista[2] }} pts</span>
+                                                {% if conquista[5] %}
+                                                <span class="badge bg-success">Conquistada!</span>
+                                                {% else %}
+                                                <span class="badge bg-secondary">Bloqueada</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-medal fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">Nenhuma conquista disponível</h5>
+                                <p class="text-muted">Complete aulas e exercícios para desbloquear conquistas!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desafios Diários -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-calendar-day me-2 text-primary"></i>Desafios Diários
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card border-0 bg-light h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style="width: 60px; height: 60px;">
+                                                <i class="fas fa-book fa-2x text-white"></i>
+                                            </div>
+                                            <h6 class="card-title">Estudar 30 min</h6>
+                                            <p class="card-text text-muted small">Complete 30 minutos de estudo hoje</p>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar bg-primary" style="width: 75%"></div>
+                                            </div>
+                                            <span class="badge bg-primary">+25 pontos</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <div class="card border-0 bg-light h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style="width: 60px; height: 60px;">
+                                                <i class="fas fa-check-circle fa-2x text-white"></i>
+                                            </div>
+                                            <h6 class="card-title">Concluir 1 aula</h6>
+                                            <p class="card-text text-muted small">Finalize uma aula completa</p>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar bg-success" style="width: 100%"></div>
+                                            </div>
+                                            <span class="badge bg-success">+50 pontos</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <div class="card border-0 bg-light h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style="width: 60px; height: 60px;">
+                                                <i class="fas fa-star fa-2x text-white"></i>
+                                            </div>
+                                            <h6 class="card-title">Responder 3 exercícios</h6>
+                                            <p class="card-text text-muted small">Complete 3 exercícios com sucesso</p>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" style="width: 33%"></div>
+                                            </div>
+                                            <span class="badge bg-warning">+30 pontos</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para animações -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animar progress bars
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 500);
+        });
+
+        // Adicionar efeito hover nos cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-5px)';
+            });
+
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

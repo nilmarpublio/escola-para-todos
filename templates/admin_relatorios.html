@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_usuarios') }}">
+                            <i class="fas fa-users me-2"></i>Gerenciar Usuários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorio_usuarios') }}">
+                            <i class="fas fa-user-chart me-2"></i>Relatório Usuários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorio_turmas') }}">
+                            <i class="fas fa-chalkboard me-2"></i>Relatório Turmas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-chart-bar me-2"></i>Relatórios do Sistema
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button class="btn btn-outline-secondary me-2" onclick="exportData()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                    <button class="btn btn-primary" onclick="refreshReports()">
+                        <i class="fas fa-sync-alt me-2"></i>Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cards de Resumo -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-primary text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_usuarios }}</h4>
+                                    <p class="card-text">Total de Usuários</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_turmas }}</h4>
+                                    <p class="card-text">Total de Turmas</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chalkboard fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-info text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_aulas }}</h4>
+                                    <p class="card-text">Total de Aulas</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-book fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_exercicios }}</h4>
+                                    <p class="card-text">Total de Exercícios</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-question-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos e Relatórios -->
+            <div class="row">
+                <!-- Distribuição de Usuários por Tipo -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-pie-chart me-2"></i>Distribuição de Usuários
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="userTypeChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progresso por Disciplina -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-chart-line me-2"></i>Progresso por Disciplina
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="disciplineChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatórios Detalhados -->
+            <div class="row">
+                <!-- Relatórios por Turma -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-chalkboard me-2"></i>Relatórios por Turma
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <a href="{{ url_for('admin_relatorio_turmas') }}"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Relatório Geral de Turmas</h6>
+                                        <small class="text-muted">Estatísticas completas de todas as turmas</small>
+                                    </div>
+                                    <i class="fas fa-arrow-right text-primary"></i>
+                                </a>
+                                <a href="#"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Performance por Série</h6>
+                                        <small class="text-muted">Comparativo entre diferentes séries</small>
+                                    </div>
+                                    <i class="fas fa-arrow-right text-primary"></i>
+                                </a>
+                                <a href="#"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Ranking de Turmas</h6>
+                                        <small class="text-muted">Ordenação por desempenho</small>
+                                    </div>
+                                    <i class="fas fa-arrow-right text-primary"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relatórios por Usuário -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-user-chart me-2"></i>Relatórios por Usuário
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <a href="{{ url_for('admin_relatorio_usuarios') }}"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Relatório Geral de Usuários</h6>
+                                        <small class="text-muted">Estatísticas completas de todos os usuários</small>
+                                    </div>
+                                    <i class="fas fa-arrow-right text-primary"></i>
+                                </a>
+                                <a href="#"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Performance dos Alunos</h6>
+                                        <small class="text-muted">Ranking e progresso individual</small>
+                                    </div>
+                                    <i class="fas fa-arrow-right text-primary"></i>
+                                </a>
+                                <a href="#"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Atividade dos Professores</h6>
+                                        <small class="text-muted">Produtividade e engajamento</small>
+                                    </div>
+                                    <i class="fas fa-arrow-right text-primary"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatórios por Aula -->
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-book me-2"></i>Relatórios por Aula
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="list-group list-group-flush">
+                                        <a href="#"
+                                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">Aulas Mais Assistidas</h6>
+                                                <small class="text-muted">Ranking de popularidade</small>
+                                            </div>
+                                            <i class="fas fa-arrow-right text-primary"></i>
+                                        </a>
+                                        <a href="#"
+                                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">Taxa de Conclusão</h6>
+                                                <small class="text-muted">Percentual de alunos que terminam</small>
+                                            </div>
+                                            <i class="fas fa-arrow-right text-primary"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="list-group list-group-flush">
+                                        <a href="#"
+                                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">Exercícios por Aula</h6>
+                                                <small class="text-muted">Quantidade e dificuldade</small>
+                                            </div>
+                                            <i class="fas fa-arrow-right text-primary"></i>
+                                        </a>
+                                        <a href="#"
+                                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">Feedback dos Alunos</h6>
+                                                <small class="text-muted">Avaliações e comentários</small>
+                                            </div>
+                                            <i class="fas fa-arrow-right text-primary"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="list-group list-group-flush">
+                                        <a href="#"
+                                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">Tempo de Estudo</h6>
+                                                <small class="text-muted">Duração média por aula</small>
+                                            </div>
+                                            <i class="fas fa-arrow-right text-primary"></i>
+                                        </a>
+                                        <a href="#"
+                                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">Retenção de Conhecimento</h6>
+                                                <small class="text-muted">Efetividade do aprendizado</small>
+                                            </div>
+                                            <i class="fas fa-arrow-right text-primary"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros Avançados -->
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-filter me-2"></i>Filtros Avançados
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="dateRange" class="form-label">Período</label>
+                                    <select class="form-select" id="dateRange">
+                                        <option value="7">Últimos 7 dias</option>
+                                        <option value="30" selected>Últimos 30 dias</option>
+                                        <option value="90">Últimos 3 meses</option>
+                                        <option value="365">Último ano</option>
+                                        <option value="custom">Personalizado</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="userTypeFilter" class="form-label">Tipo de Usuário</label>
+                                    <select class="form-select" id="userTypeFilter">
+                                        <option value="">Todos</option>
+                                        <option value="aluno">Alunos</option>
+                                        <option value="professor">Professores</option>
+                                        <option value="admin">Administradores</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="serieFilter" class="form-label">Série</label>
+                                    <select class="form-select" id="serieFilter">
+                                        <option value="">Todas</option>
+                                        <option value="6">6º Ano</option>
+                                        <option value="7">7º Ano</option>
+                                        <option value="8">8º Ano</option>
+                                        <option value="9">9º Ano</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" onclick="applyFilters()">
+                                        <i class="fas fa-search me-2"></i>Aplicar Filtros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid #f8f9fa;
+        transition: all 0.2s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+
+    .list-group-item-action:hover {
+        color: #007bff;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Gráfico de Distribuição de Usuários
+    const userTypeCtx = document.getElementById('userTypeChart').getContext('2d');
+    const userTypeChart = new Chart(userTypeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for tipo, total in usuarios_por_tipo %}
+                '{{ get_user_type_display(tipo) }}',
+        {% endfor %}
+        ],
+    datasets: [{
+        data: [
+            {% for tipo, total in usuarios_por_tipo %}
+    {{ total }},
+    {% endfor %}
+    ],
+        backgroundColor: [
+            '#28a745', // Verde para alunos
+            '#17a2b8', // Azul para professores
+            '#ffc107'  // Amarelo para admins
+        ],
+            borderWidth: 2,
+                borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+    // Gráfico de Progresso por Disciplina
+    const disciplineCtx = document.getElementById('disciplineChart').getContext('2d');
+    const disciplineChart = new Chart(disciplineCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for disciplina in progresso_disciplinas %}
+                '{{ disciplina[0] }}',
+            {% endfor %}
+        ],
+    datasets: [{
+        label: 'Média de Pontuação',
+        data: [
+            {% for disciplina in progresso_disciplinas %}
+                    {{ disciplina[2] or 0 }},
+    {% endfor %}
+    ],
+        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                scales: {
+            y: {
+                beginAtZero: true,
+                    max: 100
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+    function exportData() {
+        alert('Funcionalidade de exportação será implementada em breve!');
+    }
+
+    function refreshReports() {
+        location.reload();
+    }
+
+    function applyFilters() {
+        const dateRange = document.getElementById('dateRange').value;
+        const userType = document.getElementById('userTypeFilter').value;
+        const serie = document.getElementById('serieFilter').value;
+
+        // Aqui você pode implementar a lógica para aplicar os filtros
+        console.log('Aplicando filtros:', { dateRange, userType, serie });
+        alert('Filtros aplicados! (Funcionalidade será implementada)');
+    }
+
+    // Atualizar gráficos quando a página carregar
+    document.addEventListener('DOMContentLoaded', function () {
+        // Os gráficos já estão configurados acima
+    });
+</script>
+{% endblock %}

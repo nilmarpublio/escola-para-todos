@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório do Aluno - Professor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_aulas') }}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                            <i class="fas fa-plus me-2"></i>Criar Aula
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('professor_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-user-graduate me-2"></i>Relatório do Aluno
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('professor_relatorios') }}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </a>
+                    <button type="button" class="btn btn-outline-primary" onclick="exportarRelatorio()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Informações do Aluno -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user-graduate me-2"></i>{{ aluno[1] }} {{ aluno[2] }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="h3 text-primary mb-1">{{ total_aulas }}</div>
+                                        <div class="text-muted">Total de Aulas</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="h3 text-success mb-1">{{ aulas_concluidas }}</div>
+                                        <div class="text-muted">Aulas Concluídas</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="h3 text-info mb-1">{{ total_pontos }}</div>
+                                        <div class="text-muted">Pontuação Total</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="h3 text-warning mb-1">{{ "%.1f"|format(percentual_conclusao) }}%
+                                        </div>
+                                        <div class="text-muted">Taxa de Conclusão</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Username:</strong> {{ aluno[3] }}</p>
+                                    <p><strong>Email:</strong> {{ aluno[4] }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Turma:</strong> {{ aluno[6] }}</p>
+                                    <p><strong>Série:</strong> {{ aluno[5] }}ª Série</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progresso das Aulas -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Progresso das Aulas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Aula</th>
+                                            <th>Disciplina</th>
+                                            <th>Série</th>
+                                            <th>Status</th>
+                                            <th>Pontuação</th>
+                                            <th>Tempo Assistido</th>
+                                            <th>Última Atividade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for aula in progresso_aulas %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm me-3">
+                                                        <i class="fas fa-play-circle fa-2x text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">{{ aula[1] }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ aula[2] }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ aula[3] }}ª Série</span>
+                                            </td>
+                                            <td>
+                                                {% if aula[4] == 'concluido' %}
+                                                <span class="badge bg-success">Concluído</span>
+                                                {% elif aula[4] == 'em_andamento' %}
+                                                <span class="badge bg-warning">Em andamento</span>
+                                                {% else %}
+                                                <span class="badge bg-secondary">Não iniciado</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-primary">{{ aula[5] or 0 }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted">{{ aula[6] or 0 }} min</span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    {% if aula[7] %}
+                                                    {{ format_datetime(aula[7]) }}
+                                                    {% else %}
+                                                    -
+                                                    {% endif %}
+                                                </small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos de Análise -->
+            <div class="row mt-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-chart-pie me-2"></i>Status das Aulas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="statusChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-chart-bar me-2"></i>Pontuação por Disciplina
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="disciplinaChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function exportarRelatorio() {
+        // Implementar exportação do relatório
+        alert('Funcionalidade de exportação será implementada em breve!');
+    }
+
+    // Gráfico de Pizza - Status das Aulas
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Concluído', 'Em andamento', 'Não iniciado'],
+            datasets: [{
+                data: [
+                    {{ aulas_concluidas }},
+            {{ total_aulas - aulas_concluidas }
+    },
+        {{ total_aulas - aulas_concluidas }}
+            ],
+    backgroundColor: ['#28a745', '#ffc107', '#6c757d'],
+        borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+    // Gráfico de Barras - Pontuação por Disciplina
+    const disciplinaCtx = document.getElementById('disciplinaChart').getContext('2d');
+    const disciplinaChart = new Chart(disciplinaCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% set disciplinas = [] %}
+            {% for aula in progresso_aulas %}
+    {% if aula[2] not in disciplinas %}
+    {% set _ = disciplinas.append(aula[2]) %}
+    {% endif %}
+    {% endfor %}
+    {% for disciplina in disciplinas %}
+    '{{ disciplina }}',
+        {% endfor %}
+        ],
+    datasets: [{
+        label: 'Pontuação Total',
+        data: [
+            {% for disciplina in disciplinas %}
+                    {% set pontuacao_disciplina = 0 %}
+    {% for aula in progresso_aulas %}
+    {% if aula[2] == disciplina %}
+    {% set pontuacao_disciplina = pontuacao_disciplina + (aula[5] or 0) %}
+    {% endif %}
+    {% endfor %}
+    {{ pontuacao_disciplina }},
+    {% endfor %}
+            ],
+    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

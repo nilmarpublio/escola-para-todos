@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Busca no Fórum - EduApp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_aulas') }}">
+                            <i class="fas fa-book me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_gamificacao') }}">
+                            <i class="fas fa-gamepad me-2"></i>Gamificação
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('forum') }}">
+                            <i class="fas fa-comments me-2"></i>Fórum
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_ranking') }}">
+                            <i class="fas fa-trophy me-2"></i>Ranking
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mt-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('forum') }}">Fórum</a></li>
+                    <li class="breadcrumb-item active">Resultados da Busca</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-search me-2"></i>Resultados da Busca
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ url_for('forum_novo_topico') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Novo Tópico
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros Ativos -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h6 class="mb-3">
+                        <i class="fas fa-filter me-2"></i>Filtros Ativos:
+                    </h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if query %}
+                        <span class="badge bg-primary">
+                            <i class="fas fa-search me-1"></i>Busca: "{{ query }}"
+                            <a href="{{ url_for('forum_buscar', aula_id=aula_id, tag_id=tag_id) }}" 
+                               class="text-white text-decoration-none ms-2">×</a>
+                        </span>
+                        {% endif %}
+                        
+                        {% if aula_id %}
+                        {% for aula in aulas %}
+                            {% if aula[0]|string == aula_id %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-book me-1"></i>Aula: {{ aula[1] }}
+                                <a href="{{ url_for('forum_buscar', q=query, tag_id=tag_id) }}" 
+                                   class="text-white text-decoration-none ms-2">×</a>
+                            </span>
+                            {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                        
+                        {% if tag_id %}
+                        {% for tag in tags %}
+                            {% if tag[0]|string == tag_id %}
+                            <span class="badge" style="background-color: {{ tag[1] }}; color: white;">
+                                <i class="fas fa-tag me-1"></i>Tag: {{ tag[0] }}
+                                <a href="{{ url_for('forum_buscar', q=query, aula_id=aula_id) }}" 
+                                   class="text-white text-decoration-none ms-2">×</a>
+                            </span>
+                            {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                        
+                        <a href="{{ url_for('forum') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Limpar Todos
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Busca Refinada -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('forum_buscar') }}" class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="q" placeholder="Buscar tópicos..." 
+                                   value="{{ query }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="aula_id">
+                                <option value="">Todas as aulas</option>
+                                {% for aula in aulas %}
+                                <option value="{{ aula[0] }}" {% if aula_id == aula[0]|string %}selected{% endif %}>
+                                    {{ aula[1] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="tag_id">
+                                <option value="">Todas as tags</option>
+                                {% for tag in tags %}
+                                <option value="{{ tag[0] }}" {% if tag_id == tag[0]|string %}selected{% endif %}>
+                                    {{ tag[0] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-list me-2"></i>Resultados ({{ topicos|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if topicos %}
+                        <div class="list-group list-group-flush">
+                            {% for topico in topicos %}
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <h6 class="mb-0 me-3">
+                                                <a href="{{ url_for('forum_topico', topico_id=topico[0]) }}" class="text-decoration-none">
+                                                    {{ topico[1] }}
+                                                </a>
+                                            </h6>
+                                            <span class="badge bg-{{ 'success' if topico[4] == 'resolvido' else 'warning' if topico[4] == 'fechado' else 'primary' }}">
+                                                {{ topico[4]|title }}
+                                            </span>
+                                            <span class="badge bg-secondary ms-2">{{ topico[3]|title }}</span>
+                                        </div>
+                                        
+                                        <div class="text-muted small mb-2">
+                                            <i class="fas fa-user me-1"></i>{{ topico[7] }}
+                                            {% if topico[8] == 'professor' %}
+                                                <span class="badge bg-info ms-2">Professor</span>
+                                            {% endif %}
+                                            <i class="fas fa-book ms-3 me-1"></i>{{ topico[9] }}
+                                            <i class="fas fa-clock ms-3 me-1"></i>{{ format_datetime(topico[5], '%d/%m %H:%M') }}
+                                            <i class="fas fa-eye ms-3 me-1"></i>{{ topico[6] }}
+                                        </div>
+                                        
+                                        {% if topico[12] %}
+                                        <div class="mb-2">
+                                            {% for tag in topico[12].split(',') %}
+                                            <span class="badge bg-light text-dark me-1">{{ tag }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-4 text-end">
+                                        <div class="d-flex align-items-center justify-content-end">
+                                            <div class="text-center me-3">
+                                                <div class="h5 mb-0 text-primary">{{ topico[10] }}</div>
+                                                <small class="text-muted">Respostas</small>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="h5 mb-0 text-success">{{ topico[6] }}</div>
+                                                <small class="text-muted">Visualizações</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Nenhum Resultado Encontrado</h4>
+                            <p class="text-muted">
+                                {% if query or aula_id or tag_id %}
+                                    Tente ajustar os filtros ou usar termos de busca diferentes.
+                                {% else %}
+                                    Não há tópicos disponíveis no momento.
+                                {% endif %}
+                            </p>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="{{ url_for('forum') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Voltar ao Fórum
+                                </a>
+                                <a href="{{ url_for('forum_novo_topico') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i>Criar Novo Tópico
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sugestões de Busca -->
+            {% if not topicos and (query or aula_id or tag_id) %}
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-lightbulb me-2"></i>Sugestões de Busca
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">🔍 Dicas para melhorar sua busca:</h6>
+                            <ul class="small text-muted">
+                                <li>Use palavras-chave mais gerais</li>
+                                <li>Verifique a ortografia</li>
+                                <li>Tente sinônimos</li>
+                                <li>Reduza o número de filtros</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success">💡 Exemplos de busca:</h6>
+                            <ul class="small text-muted">
+                                <li>"derivada" em vez de "derivada de função composta"</li>
+                                <li>"exercício" em vez de "exercício número 3"</li>
+                                <li>"matemática" em vez de "matemática avançada"</li>
+                                <li>Use apenas um filtro por vez</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid #e3e6f0;
+        transition: background-color 0.2s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fc;
+    }
+
+    .badge a:hover {
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Professor - EduApp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_aulas') }}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                            <i class="fas fa-plus me-2"></i>Criar Aula
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Dashboard do Professor
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ url_for('criar_aula') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-plus me-1"></i>Nova Aula
+                        </a>
+                        <a href="{{ url_for('criar_turma') }}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-users me-1"></i>Nova Turma
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total de Aulas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.total_aulas }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Total de Turmas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.total_turmas }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Total de Alunos
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.total_alunos }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Média de Aulas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {% if data.total_turmas > 0 %}
+                                            {{ (data.total_aulas / data.total_turmas) | round(1) }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aulas Recentes -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas Recentes
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.aulas %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Disciplina</th>
+                                            <th>Série</th>
+                                            <th>Data de Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for aula in data.aulas %}
+                                        <tr>
+                                            <td>{{ aula.titulo }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ aula.disciplina }}</span>
+                                            </td>
+                                            <td>{{ aula.serie }}</td>
+                                            <td>{{ format_datetime(aula.created_at) }}</td>
+                                            <td>
+                                                <a href="{{ url_for('professor_exercicios', aula_id=aula.id) }}" class="btn btn-sm btn-primary" title="Ver Exercícios">
+                                                    <i class="fas fa-list"></i>
+                                                </a>
+                                                <a href="{{ url_for('editar_aula', aula_id=aula.id) }}" class="btn btn-sm btn-warning" title="Editar Aula">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="POST" action="{{ url_for('excluir_aula', aula_id=aula.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta aula?')">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Excluir Aula">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Nenhuma aula criada ainda</h5>
+                                <p class="text-muted">Comece criando sua primeira aula!</p>
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Criar Primeira Aula
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Turmas -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-success">
+                                <i class="fas fa-users me-2"></i>Minhas Turmas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.turmas %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome da Turma</th>
+                                            <th>Série</th>
+                                            <th>Data de Criação</th>
+                                            <th>Alunos</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for turma in data.turmas %}
+                                        <tr>
+                                            <td>{{ turma.nome }}</td>
+                                            <td>{{ turma.serie }}</td>
+                                            <td>{{ format_datetime(turma.created_at) }}</td>
+                                            <td>
+                                                <span class="badge bg-info">12 alunos</span>
+                                            </td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Nenhuma turma criada ainda</h5>
+                                <p class="text-muted">Comece criando sua primeira turma!</p>
+                                <button class="btn btn-success">
+                                    <i class="fas fa-plus me-2"></i>Criar Primeira Turma
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .border-left-primary {
+        border-left: 0.25rem solid #007bff !important;
+    }
+
+    .border-left-success {
+        border-left: 0.25rem solid #28a745 !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #17a2b8 !important;
+    }
+
+    .border-left-warning {
+        border-left: 0.25rem solid #ffc107 !important;
+    }
+
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .btn-toolbar .btn-group .btn {
+        border-radius: 0.35rem;
+    }
+</style>
+{% endblock %}

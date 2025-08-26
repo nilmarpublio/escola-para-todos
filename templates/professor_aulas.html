@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Aulas - Professor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('professor_aulas') }}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                            <i class="fas fa-plus me-2"></i>Criar Aula
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('criar_aula') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nova Aula
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="disciplina-filter" class="form-label">Disciplina</label>
+                                    <select class="form-select" id="disciplina-filter">
+                                        <option value="">Todas</option>
+                                        <option value="Matemática">Matemática</option>
+                                        <option value="Português">Português</option>
+                                        <option value="História">História</option>
+                                        <option value="Geografia">Geografia</option>
+                                        <option value="Ciências">Ciências</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="serie-filter" class="form-label">Série</label>
+                                    <select class="form-select" id="serie-filter">
+                                        <option value="">Todas</option>
+                                        <option value="6º Ano">6º Ano</option>
+                                        <option value="7º Ano">7º Ano</option>
+                                        <option value="8º Ano">8º Ano</option>
+                                        <option value="9º Ano">9º Ano</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="status-filter" class="form-label">Status</label>
+                                    <select class="form-select" id="status-filter">
+                                        <option value="">Todos</option>
+                                        <option value="ativa">Ativa</option>
+                                        <option value="rascunho">Rascunho</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="limparFiltros()">
+                                        <i class="fas fa-times me-1"></i>Limpar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Aulas -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-list me-2"></i>Lista de Aulas ({{ aulas|length }})
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if aulas %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Disciplina</th>
+                                            <th>Série</th>
+                                            <th>Duração</th>
+                                            <th>Data de Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for aula in aulas %}
+                                        <tr class="aula-row" data-disciplina="{{ aula.disciplina }}" data-serie="{{ aula.serie }}">
+                                            <td>
+                                                <strong>{{ aula.titulo }}</strong>
+                                                {% if aula.descricao %}
+                                                <br><small class="text-muted">{{ aula.descricao[:100] }}{% if aula.descricao|length > 100 %}...{% endif %}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ aula.disciplina }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ aula.serie }}</span>
+                                            </td>
+                                            <td>
+                                                {% if aula.duracao_minutos %}
+                                                    {{ aula.duracao_minutos }} min
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ format_datetime(aula.created_at) }}</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ url_for('professor_exercicios', aula_id=aula.id) }}" class="btn btn-sm btn-primary" title="Ver Exercícios">
+                                                        <i class="fas fa-list"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('editar_aula', aula_id=aula.id) }}" class="btn btn-sm btn-warning" title="Editar Aula">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form method="POST" action="{{ url_for('excluir_aula', aula_id=aula.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta aula?')">
+                                                        <button type="submit" class="btn btn-sm btn-danger" title="Excluir Aula">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-chalkboard-teacher fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">Nenhuma aula criada ainda</h5>
+                                <p class="text-muted">Comece criando sua primeira aula!</p>
+                                <a href="{{ url_for('criar_aula') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Criar Primeira Aula
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+</style>
+
+<script>
+function limparFiltros() {
+    document.getElementById('disciplina-filter').value = '';
+    document.getElementById('serie-filter').value = '';
+    document.getElementById('status-filter').value = '';
+    aplicarFiltros();
+}
+
+function aplicarFiltros() {
+    const disciplina = document.getElementById('disciplina-filter').value;
+    const serie = document.getElementById('serie-filter').value;
+    const status = document.getElementById('status-filter').value;
+    
+    const aulas = document.querySelectorAll('.aula-row');
+    
+    aulas.forEach(aula => {
+        let mostrar = true;
+        
+        if (disciplina && aula.dataset.disciplina !== disciplina) {
+            mostrar = false;
+        }
+        
+        if (serie && aula.dataset.serie !== serie) {
+            mostrar = false;
+        }
+        
+        if (mostrar) {
+            aula.style.display = '';
+        } else {
+            aula.style.display = 'none';
+        }
+    });
+}
+
+// Aplicar filtros quando mudar os valores
+document.getElementById('disciplina-filter').addEventListener('change', aplicarFiltros);
+document.getElementById('serie-filter').addEventListener('change', aplicarFiltros);
+document.getElementById('status-filter').addEventListener('change', aplicarFiltros);
+</script>
+{% endblock %}

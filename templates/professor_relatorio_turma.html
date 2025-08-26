@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório da Turma - Professor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_aulas') }}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                            <i class="fas fa-plus me-2"></i>Criar Aula
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('professor_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-chart-bar me-2"></i>Relatório da Turma
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('professor_relatorios') }}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </a>
+                    <button type="button" class="btn btn-outline-primary" onclick="exportarRelatorio()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Informações da Turma -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-users me-2"></i>{{ turma[1] }} - {{ turma[2] }}ª Série
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="h3 text-primary mb-1">{{ total_alunos }}</div>
+                                        <div class="text-muted">Total de Alunos</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="h3 text-success mb-1">{{ total_aulas_turma }}</div>
+                                        <div class="text-muted">Total de Aulas</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="h3 text-info mb-1">{{ "%.1f"|format(media_turma) }}</div>
+                                        <div class="text-muted">Média da Turma</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="h3 text-warning mb-1">
+                                            {{ "%.1f"|format((total_alunos / total_aulas_turma * 100) if total_aulas_turma > 0 else 0) }}%
+                                        </div>
+                                        <div class="text-muted">Taxa de Participação</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Alunos -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user-graduate me-2"></i>Desempenho dos Alunos
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Aluno</th>
+                                            <th>Username</th>
+                                            <th>Aulas Concluídas</th>
+                                            <th>Total de Aulas</th>
+                                            <th>Pontuação Total</th>
+                                            <th>Média</th>
+                                            <th>Progresso</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for aluno in alunos_progresso %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm me-3">
+                                                        <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">{{ aluno[1] }} {{ aluno[2] }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ aluno[3] }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">{{ aluno[5] }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ aluno[4] }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-primary">{{ aluno[6] or 0 }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-warning">{{ "%.1f"|format(aluno[7] or 0) }}</span>
+                                            </td>
+                                            <td>
+                                                {% set percentual = (aluno[5] / aluno[4] * 100) if aluno[4] > 0 else 0 %}
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" 
+                                                         style="width: {{ percentual }}%"
+                                                         aria-valuenow="{{ percentual }}" 
+                                                         aria-valuemin="0" aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                                <small class="text-muted">{{ "%.1f"|format(percentual) }}%</small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportarRelatorio() {
+    // Implementar exportação do relatório
+    alert('Funcionalidade de exportação será implementada em breve!');
+}
+</script>
+{% endblock %}

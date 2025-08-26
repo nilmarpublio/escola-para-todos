@@ -1,0 +1,11 @@
+# Configurações do Flask
+SECRET_KEY=sua-chave-secreta-aqui
+FLASK_ENV=development
+FLASK_DEBUG=1
+
+# Configurações do Banco de Dados PostgreSQL
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/escola_para_todos
+
+# Configurações de Segurança
+WTF_CSRF_ENABLED=True
+WTF_CSRF_SECRET_KEY=sua-chave-csrf-aqui

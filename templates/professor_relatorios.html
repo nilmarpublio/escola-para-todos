@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - Professor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_aulas') }}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                            <i class="fas fa-plus me-2"></i>Criar Aula
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('professor_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-chart-bar me-2"></i>Relatórios e Analytics
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button type="button" class="btn btn-outline-primary" onclick="exportarRelatorio()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cards de Resumo -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total de Aulas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-aulas">-</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Total de Turmas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-turmas">-</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Total de Alunos
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-alunos">-</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Média de Progresso
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="media-progresso">-</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegação de Relatórios -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-list me-2"></i>Tipos de Relatórios Disponíveis
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-primary">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                                            <h5 class="card-title text-primary">Relatórios por Turma</h5>
+                                            <p class="card-text">Visualize o desempenho geral de cada turma, incluindo estatísticas de progresso e participação dos alunos.</p>
+                                            <a href="#relatorios-turma" class="btn btn-primary">
+                                                <i class="fas fa-chart-bar me-2"></i>Ver Relatórios
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-user-graduate fa-3x text-success mb-3"></i>
+                                            <h5 class="card-title text-success">Relatórios por Aluno</h5>
+                                            <p class="card-text">Acompanhe o progresso individual de cada aluno, com detalhes sobre aulas concluídas e pontuação.</p>
+                                            <a href="#relatorios-aluno" class="btn btn-success">
+                                                <i class="fas fa-user-chart me-2"></i>Ver Relatórios
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-info">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-chalkboard-teacher fa-3x text-info mb-3"></i>
+                                            <h5 class="card-title text-info">Relatórios por Aula</h5>
+                                            <p class="card-text">Analise o desempenho dos alunos em aulas específicas e identifique pontos de melhoria.</p>
+                                            <a href="#relatorios-aula" class="btn btn-info">
+                                                <i class="fas fa-chart-pie me-2"></i>Ver Relatórios
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Relatórios por Turma -->
+            <div class="row mb-4" id="relatorios-turma">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-users me-2"></i>Relatórios por Turma
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Como usar:</strong> Clique em "Ver Relatório" para acessar estatísticas detalhadas de cada turma, incluindo progresso dos alunos, aulas concluídas e pontuação média.
+                            </div>
+                            
+                            <div class="row" id="turmas-container">
+                                <div class="col-12 text-center py-4">
+                                    <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                                    <p class="text-muted">Carregando turmas...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Relatórios por Aluno -->
+            <div class="row mb-4" id="relatorios-aluno">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-success">
+                                <i class="fas fa-user-graduate me-2"></i>Relatórios por Aluno
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-success">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Como usar:</strong> Selecione uma turma para visualizar relatórios individuais de cada aluno, incluindo progresso detalhado e histórico de atividades.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="turma-select" class="form-label">Selecione uma Turma:</label>
+                                    <select class="form-select" id="turma-select">
+                                        <option value="">Escolha uma turma...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <button type="button" class="btn btn-success" onclick="carregarAlunosTurma()" disabled id="btn-carregar-alunos">
+                                        <i class="fas fa-search me-2"></i>Carregar Alunos
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3" id="alunos-container">
+                                <!-- Alunos serão carregados aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Relatórios por Aula -->
+            <div class="row mb-4" id="relatorios-aula">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-info">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Relatórios por Aula
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Como usar:</strong> Visualize estatísticas de desempenho para cada aula, incluindo taxa de conclusão e pontuação média dos alunos.
+                            </div>
+                            
+                            <div class="row" id="aulas-container">
+                                <div class="col-12 text-center py-4">
+                                    <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                                    <p class="text-muted">Carregando aulas...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .border-left-primary {
+        border-left: 0.25rem solid #007bff !important;
+    }
+
+    .border-left-success {
+        border-left: 0.25rem solid #28a745 !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #17a2b8 !important;
+    }
+
+    .border-left-warning {
+        border-left: 0.25rem solid #ffc107 !important;
+    }
+
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+
+    .btn {
+        border-radius: 0.375rem;
+    }
+</style>
+
+<script>
+// Função para exportar relatório
+function exportarRelatorio() {
+    alert('Funcionalidade de exportação será implementada em breve!');
+}
+
+// Função para carregar estatísticas básicas
+function carregarEstatisticas() {
+    // Simular carregamento de dados
+    setTimeout(() => {
+        document.getElementById('total-aulas').textContent = '12';
+        document.getElementById('total-turmas').textContent = '3';
+        document.getElementById('total-alunos').textContent = '45';
+        document.getElementById('media-progresso').textContent = '78%';
+    }, 1000);
+}
+
+// Função para carregar turmas
+function carregarTurmas() {
+    // Simular carregamento de turmas
+    setTimeout(() => {
+        const container = document.getElementById('turmas-container');
+        container.innerHTML = `
+            <div class="col-md-6 mb-3">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">7º Ano A - Matemática</h6>
+                        <p class="card-text">Turma com foco em álgebra e geometria básica</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">15 alunos</small>
+                            <a href="#" class="btn btn-primary btn-sm">Ver Relatório</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <h6 class="card-title text-success">8º Ano B - Matemática</h6>
+                        <p class="card-text">Turma avançada com foco em equações e funções</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">18 alunos</small>
+                            <a href="#" class="btn btn-success btn-sm">Ver Relatório</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 1500);
+}
+
+// Função para carregar aulas
+function carregarAulas() {
+    // Simular carregamento de aulas
+    setTimeout(() => {
+        const container = document.getElementById('aulas-container');
+        container.innerHTML = `
+            <div class="col-md-6 mb-3">
+                <div class="card border-info">
+                    <div class="card-body">
+                        <h6 class="card-title text-info">Introdução às Equações</h6>
+                        <p class="card-text">Conceitos básicos de equações do 1º grau</p>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 85%">85%</div>
+                        </div>
+                        <small class="text-muted">17 de 20 alunos concluíram</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h6 class="card-title text-warning">Geometria Plana</h6>
+                        <p class="card-text">Áreas e perímetros de figuras geométricas</p>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-warning" style="width: 65%">65%</div>
+                        </div>
+                        <small class="text-muted">13 de 20 alunos concluíram</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 2000);
+}
+
+// Função para carregar alunos de uma turma
+function carregarAlunosTurma() {
+    const turmaSelect = document.getElementById('turma-select');
+    const turmaId = turmaSelect.value;
+    
+    if (!turmaId) {
+        alert('Por favor, selecione uma turma.');
+        return;
+    }
+    
+    // Simular carregamento de alunos
+    const container = document.getElementById('alunos-container');
+    container.innerHTML = `
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-spinner fa-spin me-2"></i>
+                Carregando alunos da turma selecionada...
+            </div>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        container.innerHTML = `
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">João Silva</h6>
+                        <p class="card-text">Progresso: 78% | Pontos: 245</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm">Ver Relatório</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Maria Santos</h6>
+                        <p class="card-text">Progresso: 92% | Pontos: 312</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm">Ver Relatório</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 1500);
+}
+
+// Habilitar botão quando turma for selecionada
+document.getElementById('turma-select').addEventListener('change', function() {
+    const btnCarregar = document.getElementById('btn-carregar-alunos');
+    btnCarregar.disabled = !this.value;
+});
+
+// Carregar dados quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    carregarEstatisticas();
+    carregarTurmas();
+    carregarAulas();
+});
+</script>
+{% endblock %}

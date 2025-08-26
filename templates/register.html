@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Registro - EduApp{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Criar Conta
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('register') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">
+                                    <i class="fas fa-user me-1"></i>Nome
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="first_name" 
+                                       name="first_name" 
+                                       required 
+                                       autocomplete="given-name"
+                                       placeholder="Digite seu nome">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">
+                                    <i class="fas fa-user me-1"></i>Sobrenome
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="last_name" 
+                                       name="last_name" 
+                                       required 
+                                       autocomplete="family-name"
+                                       placeholder="Digite seu sobrenome">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-at me-1"></i>Nome de usuário
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   name="username" 
+                                   required 
+                                   autocomplete="username"
+                                   placeholder="Escolha um nome de usuário único">
+                            <div class="form-text">
+                                <small>O nome de usuário será usado para fazer login</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>Email
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   required 
+                                   autocomplete="email"
+                                   placeholder="Digite seu email">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>Senha
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       required 
+                                       autocomplete="new-password"
+                                       placeholder="Mínimo 6 caracteres">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="confirm_password" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>Confirmar Senha
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="confirm_password" 
+                                       name="confirm_password" 
+                                       required 
+                                       autocomplete="new-password"
+                                       placeholder="Confirme sua senha">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="user_type" class="form-label">
+                                <i class="fas fa-graduation-cap me-1"></i>Tipo de Conta
+                            </label>
+                            <select class="form-select" id="user_type" name="user_type" required>
+                                <option value="aluno" selected>👨‍🎓 Aluno</option>
+                                <option value="professor" disabled>👨‍🏫 Professor (apenas por convite)</option>
+                                <option value="admin" disabled>👨‍💼 Administrador (apenas por convite)</option>
+                            </select>
+                            <div class="form-text">
+                                <small>Alunos podem se registrar livremente. Professores e administradores são criados pelo admin.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+                            <label class="form-check-label" for="terms">
+                                Concordo com os <a href="#" class="text-decoration-none">Termos de Uso</a> e 
+                                <a href="#" class="text-decoration-none">Política de Privacidade</a>
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Criar Conta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer text-center py-3">
+                    <div class="small">
+                        <p class="mb-0">Já tem uma conta?</p>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>Fazer Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Informações sobre tipos de conta -->
+            <div class="card mt-3 border-info">
+                <div class="card-header bg-info text-white text-center py-2">
+                    <small><i class="fas fa-info-circle me-1"></i>Tipos de Conta</small>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="text-info mb-1">
+                                <i class="fas fa-user-graduate fa-2x"></i>
+                            </div>
+                            <small class="text-muted d-block fw-bold">Aluno</small>
+                            <small class="text-muted">Acesso ao conteúdo educacional</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-warning mb-1">
+                                <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                            </div>
+                            <small class="text-muted d-block fw-bold">Professor</small>
+                            <small class="text-muted">Criar e gerenciar aulas</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-danger mb-1">
+                                <i class="fas fa-user-shield fa-2x"></i>
+                            </div>
+                            <small class="text-muted d-block fw-bold">Admin</small>
+                            <small class="text-muted">Gerenciar o sistema</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 20px;
+    }
+    
+    .card-header {
+        border-radius: 20px 20px 0 0 !important;
+        border: none;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+    
+    .btn {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+    
+    .form-text {
+        font-size: 0.875em;
+        color: #6c757d;
+    }
+</style>
+
+<script>
+    // Validação de senha em tempo real
+    document.getElementById('confirm_password').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        
+        if (password !== confirmPassword) {
+            this.setCustomValidity('As senhas não coincidem');
+            this.classList.add('is-invalid');
+        } else {
+            this.setCustomValidity('');
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    // Validação de força da senha
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const strength = calculatePasswordStrength(password);
+        
+        if (password.length < 6) {
+            this.setCustomValidity('A senha deve ter pelo menos 6 caracteres');
+            this.classList.add('is-invalid');
+        } else {
+            this.setCustomValidity('');
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    function calculatePasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 6) strength++;
+        if (password.match(/[a-z]/)) strength++;
+        if (password.match(/[A-Z]/)) strength++;
+        if (password.match(/[0-9]/)) strength++;
+        if (password.match(/[^a-zA-Z0-9]/)) strength++;
+        return strength;
+    }
+</script>
+{% endblock %}
