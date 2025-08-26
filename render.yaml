@@ -3,10 +3,8 @@ services:
     name: escola-para-todos
     runtime: python
     plan: free
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
@@ -16,7 +14,5 @@ services:
         value: production
       - key: FLASK_DEBUG
         value: 0
-      - key: PORT
-        value: 5000
     healthCheckPath: /
     autoDeploy: true
