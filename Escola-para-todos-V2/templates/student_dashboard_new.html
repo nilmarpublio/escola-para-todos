@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Aluno - EduApp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_aulas') }}">
+                            <i class="fas fa-book me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_gamificacao') }}">
+                            <i class="fas fa-gamepad me-2"></i>Gamificação
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_ranking') }}">
+                            <i class="fas fa-trophy me-2"></i>Ranking
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_metas') }}">
+                            <i class="fas fa-bullseye me-2"></i>Metas Semanais
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_conquistas') }}">
+                            <i class="fas fa-medal me-2"></i>Conquistas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_progresso') }}">
+                            <i class="fas fa-chart-line me-2"></i>Progresso
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Header -->
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="fas fa-user-graduate me-2 text-primary"></i>Dashboard do Aluno
+                    </h1>
+                    <p class="text-muted mb-0">Bem-vindo de volta, {{ current_user.first_name }}! 👋</p>
+                </div>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-outline-primary">
+                            <i class="fas fa-search me-1"></i>Buscar Aulas
+                        </button>
+                        <button type="button" class="btn btn-primary">
+                            <i class="fas fa-play me-1"></i>Continuar Aula
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas Principais -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Aulas Iniciadas</h6>
+                                <h3 class="mb-0">{{ data.aulas_iniciadas }}</h3>
+                            </div>
+                            <div class="text-white-50">
+                                <i class="fas fa-play-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stat-card success">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Aulas Concluídas</h6>
+                                <h3 class="mb-0">{{ data.aulas_concluidas }}</h3>
+                            </div>
+                            <div class="text-white-50">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stat-card warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Pontos Ganhos</h6>
+                                <h3 class="mb-0">{{ data.pontos_ganhos }}</h3>
+                            </div>
+                            <div class="text-white-50">
+                                <i class="fas fa-star fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stat-card info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Nível Atual</h6>
+                                <h3 class="mb-0">{{ data.nivel_atual }}</h3>
+                            </div>
+                            <div class="text-white-50">
+                                <i class="fas fa-crown fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos e Progresso -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mb-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-chart-line me-2 text-primary"></i>Progresso Semanal
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="progressoChart" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-pie-chart me-2 text-primary"></i>Distribuição de Aulas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="aulasChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aulas Recentes e Próximas -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-clock me-2 text-primary"></i>Aulas Recentes
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.aulas_recentes %}
+                            {% for aula in data.aulas_recentes[:3] %}
+                            <div class="d-flex align-items-center mb-3 p-3 border rounded-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                                        style="width: 50px; height: 50px;">
+                                        <i class="fas fa-book text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ aula.titulo }}</h6>
+                                    <p class="text-muted mb-1 small">{{ aula.disciplina }}</p>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                            <div class="progress-bar" style="width: {{ aula.progresso }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ aula.progresso }}%</small>
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <a href="{{ url_for('student_aula_view', aula_id=aula.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-play me-1"></i>Continuar
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Nenhuma aula iniciada ainda</h6>
+                                <p class="text-muted small">Comece explorando as aulas disponíveis!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-calendar-alt me-2 text-primary"></i>Próximas Atividades
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.proximas_atividades %}
+                            {% for atividade in data.proximas_atividades[:3] %}
+                            <div class="d-flex align-items-center mb-3 p-3 border rounded-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center"
+                                        style="width: 50px; height: 50px;">
+                                        <i class="fas fa-tasks text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ atividade.titulo }}</h6>
+                                    <p class="text-muted mb-1 small">{{ atividade.tipo }}</p>
+                                    <small class="text-warning">
+                                        <i class="fas fa-clock me-1"></i>{{ atividade.data_limite }}
+                                    </small>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="badge bg-warning">{{ atividade.prioridade }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Nenhuma atividade pendente</h6>
+                                <p class="text-muted small">Parabéns! Você está em dia!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conquistas e Metas -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-medal me-2 text-primary"></i>Conquistas Recentes
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.conquistas_recentes %}
+                            {% for conquista in data.conquistas_recentes[:3] %}
+                            <div class="d-flex align-items-center mb-3 p-3 border rounded-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center"
+                                        style="width: 50px; height: 50px;">
+                                        <i class="fas fa-medal text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ conquista.nome }}</h6>
+                                    <p class="text-muted mb-1 small">{{ conquista.descricao }}</p>
+                                    <small class="text-success">
+                                        <i class="fas fa-star me-1"></i>{{ conquista.pontos }} pontos
+                                    </small>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="badge bg-success">Conquistada!</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-medal fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Nenhuma conquista ainda</h6>
+                                <p class="text-muted small">Continue estudando para desbloquear conquistas!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-bullseye me-2 text-primary"></i>Metas da Semana
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.metas_semanais %}
+                            {% for meta in data.metas_semanais[:3] %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">{{ meta.titulo }}</h6>
+                                    <small class="text-muted">{{ meta.progresso }}%</small>
+                                </div>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar" style="width: {{ meta.progresso }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ meta.descricao }}</small>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-bullseye fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Nenhuma meta definida</h6>
+                                <p class="text-muted small">Defina suas metas para manter o foco!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts para os gráficos -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Gráfico de Progresso Semanal
+        const progressoCtx = document.getElementById('progressoChart').getContext('2d');
+        new Chart(progressoCtx, {
+            type: 'line',
+            data: {
+                labels: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+                datasets: [{
+                    label: 'Minutos Estudados',
+                    data: [45, 60, 30, 75, 90, 45, 30],
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(148, 163, 184, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Distribuição de Aulas
+        const aulasCtx = document.getElementById('aulasChart').getContext('2d');
+        new Chart(aulasCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Concluídas', 'Em Andamento', 'Pendentes'],
+                datasets: [{
+                    data: [{{ data.aulas_concluidas }}, {{ data.aulas_iniciadas - data.aulas_concluidas }}, 5],
+            backgroundColor: [
+                '#10b981',
+                '#4f46e5',
+                '#f59e0b'
+            ],
+            borderWidth: 0
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    usePointStyle: true
+                }
+            }
+        }
+    }
+    });
+});
+</script>
+{% endblock %}

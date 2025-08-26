@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Usuários - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_usuarios') }}">
+                            <i class="fas fa-users me-2"></i>Gerenciar Usuários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorio_usuarios') }}">
+                            <i class="fas fa-user-chart me-2"></i>Relatório Usuários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorio_turmas') }}">
+                            <i class="fas fa-chalkboard me-2"></i>Relatório Turmas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-users me-2"></i>Gerenciar Usuários
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('admin_criar_usuario') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Novo Usuário
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="filterType" class="form-label">Tipo de Usuário</label>
+                                    <select class="form-select" id="filterType">
+                                        <option value="">Todos</option>
+                                        <option value="aluno">Aluno</option>
+                                        <option value="professor">Professor</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="searchUser" class="form-label">Buscar</label>
+                                    <input type="text" class="form-control" id="searchUser"
+                                        placeholder="Nome ou email...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="sortBy" class="form-label">Ordenar por</label>
+                                    <select class="form-select" id="sortBy">
+                                        <option value="created_at">Data de Criação</option>
+                                        <option value="username">Nome de Usuário</option>
+                                        <option value="user_type">Tipo</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                        <i class="fas fa-times me-2"></i>Limpar Filtros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Usuários -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-list me-2"></i>Lista de Usuários ({{ usuarios|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if usuarios %}
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="usersTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Email</th>
+                                    <th>Tipo</th>
+                                    <th>Contador</th>
+                                    <th>Criado em</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in usuarios %}
+                                <tr data-type="{{ usuario[3] }}" data-username="{{ usuario[1] }}"
+                                    data-email="{{ usuario[2] }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3">
+                                                <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ usuario[1] }}</h6>
+                                                <small class="text-muted">{{ usuario[5] }} {{ usuario[6] }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ usuario[2] }}</td>
+                                    <td>
+                                        <span
+                                            class="badge bg-{{ 'success' if usuario[3] == 'aluno' else 'info' if usuario[3] == 'professor' else 'warning' }}">
+                                            {{ get_user_type_display(usuario[3]) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if usuario[3] == 'aluno' %}
+                                        <span class="badge bg-success">{{ usuario[7] }} turmas</span>
+                                        {% elif usuario[3] == 'professor' %}
+                                        <span class="badge bg-info">{{ usuario[7] }} turmas</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ format_datetime(usuario[4], '%d/%m/%Y') }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('admin_editar_usuario', user_id=usuario[0]) }}"
+                                                class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% if usuario[0] != current_user.id %}
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                onclick="confirmDelete({{ usuario[0] }}, '{{ usuario[1] }}')"
+                                                title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhum usuário encontrado</h5>
+                        <p class="text-muted">Comece criando o primeiro usuário do sistema!</p>
+                        <a href="{{ url_for('admin_criar_usuario') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Criar Primeiro Usuário
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o usuário <strong id="deleteUserName"></strong>?</p>
+                <p class="text-danger"><small>Esta ação não pode ser desfeita!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+</style>
+
+<script>
+    function confirmDelete(userId, userName) {
+        document.getElementById('deleteUserName').textContent = userName;
+        document.getElementById('deleteForm').action = `/admin/usuarios/${userId}/excluir`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    function clearFilters() {
+        document.getElementById('filterType').value = '';
+        document.getElementById('searchUser').value = '';
+        document.getElementById('sortBy').value = 'created_at';
+        filterUsers();
+    }
+
+    function filterUsers() {
+        const filterType = document.getElementById('filterType').value.toLowerCase();
+        const searchTerm = document.getElementById('searchUser').value.toLowerCase();
+        const rows = document.querySelectorAll('#usersTable tbody tr');
+
+        rows.forEach(row => {
+            const type = row.getAttribute('data-type').toLowerCase();
+            const username = row.getAttribute('data-username').toLowerCase();
+            const email = row.getAttribute('data-email').toLowerCase();
+
+            const typeMatch = !filterType || type === filterType;
+            const searchMatch = !searchTerm || username.includes(searchTerm) || email.includes(searchTerm);
+
+            row.style.display = typeMatch && searchMatch ? '' : 'none';
+        });
+    }
+
+    // Event listeners para filtros
+    document.getElementById('filterType').addEventListener('change', filterUsers);
+    document.getElementById('searchUser').addEventListener('input', filterUsers);
+</script>
+{% endblock %}

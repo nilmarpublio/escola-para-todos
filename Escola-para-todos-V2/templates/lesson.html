@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} - EduApp{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <!-- Main content -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h1 class="h3 mb-2">{{ lesson.title }}</h1>
+                            <p class="text-muted mb-0">{{ lesson.description }}</p>
+                        </div>
+                        <button class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Marcar como concluída
+                        </button>
+                    </div>
+
+                    <!-- Video player -->
+                    <div class="ratio ratio-16x9 mb-4">
+                        <iframe src="{{ lesson.video_url }}" allowfullscreen class="rounded"></iframe>
+                    </div>
+
+                    <!-- Lesson navigation -->
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-secondary" disabled>
+                            <i class="fas fa-chevron-left me-2"></i>Aula anterior
+                        </button>
+                        <button class="btn btn-primary">
+                            Próxima aula<i class="fas fa-chevron-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercises section -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Exercícios desta aula</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for exercise in lesson.exercises %}
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-pencil-alt text-secondary mb-3" style="font-size: 2rem;"></i>
+                                    <h6 class="card-title">{{ exercise.title }}</h6>
+                                    <button class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-play me-1"></i>Iniciar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Progress card -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Seu Progresso</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="progress mx-auto"
+                            style="width: 120px; height: 120px; border-radius: 50%; background: #e5e7eb; position: relative;">
+                            <div class="progress-bar"
+                                style="width: {{ student_data.progress }}%; height: 100%; border-radius: 50%; background: conic-gradient(var(--primary-blue) {{ student_data.progress * 3.6 }}deg, #e5e7eb 0deg);">
+                            </div>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <h4 class="mb-0">{{ student_data.progress }}%</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-0">{{ student_data.completed_lessons }}/{{ student_data.total_lessons }}
+                        aulas concluídas</p>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="fas fa-trophy me-2"></i>Conquistas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-around text-center">
+                        <div>
+                            <i class="fas fa-medal text-warning" style="font-size: 2rem;"></i>
+                            <p class="mb-0 mt-2"><small>{{ student_data.medals }} Medalhas</small></p>
+                        </div>
+                        <div>
+                            <i class="fas fa-coins text-secondary" style="font-size: 2rem;"></i>
+                            <p class="mb-0 mt-2"><small>{{ student_data.points }} Pontos</small></p>
+                        </div>
+                        <div>
+                            <i class="fas fa-fire text-danger" style="font-size: 2rem;"></i>
+                            <p class="mb-0 mt-2"><small>7 dias</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Minhas Anotações</h6>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" rows="4"
+                        placeholder="Faça suas anotações sobre esta aula..."></textarea>
+                    <button class="btn btn-primary btn-sm mt-2 w-100">
+                        <i class="fas fa-save me-1"></i>Salvar anotações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

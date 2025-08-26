@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Usuário - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_usuarios') }}">
+                            <i class="fas fa-users me-2"></i>Gerenciar Usuários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorio_usuarios') }}">
+                            <i class="fas fa-user-chart me-2"></i>Relatório Usuários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorio_turmas') }}">
+                            <i class="fas fa-chalkboard me-2"></i>Relatório Turmas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-user-edit me-2"></i>Editar Usuário
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Informações do Usuário -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-info-circle me-2"></i>Editar Informações
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" id="editUserForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label">
+                                            <i class="fas fa-user me-2"></i>Nome de Usuário
+                                        </label>
+                                        <input type="text" class="form-control" id="username" value="{{ usuario[1] }}"
+                                            readonly>
+                                        <div class="form-text">Nome de usuário não pode ser alterado</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">
+                                            <i class="fas fa-envelope me-2"></i>Email <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="email" class="form-control" id="email" name="email"
+                                            value="{{ usuario[2] }}" required>
+                                        <div class="form-text">Email válido para contato</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="first_name" class="form-label">
+                                            <i class="fas fa-id-card me-2"></i>Nome <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name"
+                                            value="{{ usuario[5] }}" required minlength="2" maxlength="50">
+                                        <div class="form-text">Nome real do usuário</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="last_name" class="form-label">
+                                            <i class="fas fa-id-card me-2"></i>Sobrenome <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name"
+                                            value="{{ usuario[6] }}" required minlength="2" maxlength="50">
+                                        <div class="form-text">Sobrenome do usuário</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="user_type" class="form-label">
+                                            <i class="fas fa-users me-2"></i>Tipo de Usuário <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" id="user_type" name="user_type" required>
+                                            <option value="aluno" {{ 'selected' if usuario[3]=='aluno' }}>👨‍🎓 Aluno
+                                            </option>
+                                            <option value="professor" {{ 'selected' if usuario[3]=='professor' }}>👨‍🏫
+                                                Professor</option>
+                                            <option value="admin" {{ 'selected' if usuario[3]=='admin' }}>👨‍💼
+                                                Administrador</option>
+                                        </select>
+                                        <div class="form-text">Define as permissões do usuário no sistema</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="created_at" class="form-label">
+                                            <i class="fas fa-calendar me-2"></i>Data de Criação
+                                        </label>
+                                        <input type="text" class="form-control" id="created_at"
+                                            value="{{ format_datetime(usuario[4], '%d/%m/%Y %H:%M') }}" readonly>
+                                        <div class="form-text">Data em que o usuário foi criado</div>
+                                    </div>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">
+                                            <i class="fas fa-lock me-2"></i>Nova Senha
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="password" name="password"
+                                                minlength="6" maxlength="50"
+                                                placeholder="Deixe em branco para manter a atual">
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                onclick="togglePassword()">
+                                                <i class="fas fa-eye" id="passwordIcon"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Deixe em branco para manter a senha atual</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirm_password" class="form-label">
+                                            <i class="fas fa-lock me-2"></i>Confirmar Nova Senha
+                                        </label>
+                                        <input type="password" class="form-control" id="confirm_password"
+                                            name="confirm_password" minlength="6" maxlength="50"
+                                            placeholder="Confirme a nova senha">
+                                        <div class="form-text">Digite a mesma senha novamente</div>
+                                    </div>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                        <i class="fas fa-undo me-2"></i>Restaurar Original
+                                    </button>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-info me-2" onclick="previewUser()">
+                                            <i class="fas fa-eye me-2"></i>Pré-visualizar
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Salvar Alterações
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview e Ações -->
+                <div class="col-lg-4">
+                    <!-- Preview do Usuário -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-eye me-2"></i>Pré-visualização
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="userPreview" class="text-center py-4">
+                                <div class="avatar-preview mb-3">
+                                    <i class="fas fa-user-circle fa-4x text-primary"></i>
+                                </div>
+                                <h5 class="mb-1">{{ usuario[5] }} {{ usuario[6] }}</h5>
+                                <p class="text-muted mb-2">@{{ usuario[1] }}</p>
+                                <span
+                                    class="badge bg-{{ 'success' if usuario[3] == 'aluno' else 'info' if usuario[3] == 'professor' else 'warning' }} mb-2">
+                                    {{ get_user_type_display(usuario[3]) }}
+                                </span>
+                                <p class="text-muted small mb-0">{{ usuario[2] }}</p>
+                                <p class="text-muted small mb-0">Criado em {{ format_datetime(usuario[4], '%d/%m/%Y') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ações Rápidas -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-bolt me-2"></i>Ações Rápidas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="resetPassword()">
+                                    <i class="fas fa-key me-2"></i>Redefinir Senha
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm"
+                                    onclick="toggleUserStatus()">
+                                    <i class="fas fa-user-slash me-2"></i>Desativar Usuário
+                                </button>
+                                {% if usuario[0] != current_user.id %}
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete()">
+                                    <i class="fas fa-trash me-2"></i>Excluir Usuário
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Histórico de Atividades -->
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-history me-2"></i>Histórico
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Usuário Criado</h6>
+                                        <small class="text-muted">{{ format_datetime(usuario[4], '%d/%m/%Y %H:%M')
+                                            }}</small>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-info"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Última Edição</h6>
+                                        <small class="text-muted">Agora</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o usuário <strong>{{ usuario[1] }}</strong>?</p>
+                <p class="text-danger"><small>Esta ação não pode ser desfeita!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('admin_excluir_usuario', user_id=usuario[0]) }}"
+                    style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 20px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -25px;
+        top: 5px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .timeline-content {
+        margin-left: 10px;
+    }
+
+    .avatar-preview {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const passwordIcon = document.getElementById('passwordIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordIcon.classList.remove('fa-eye');
+            passwordIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordIcon.classList.remove('fa-eye-slash');
+            passwordIcon.classList.add('fa-eye');
+        }
+    }
+
+    function resetForm() {
+        if (confirm('Tem certeza que deseja restaurar os valores originais?')) {
+            document.getElementById('email').value = '{{ usuario[2] }}';
+            document.getElementById('first_name').value = '{{ usuario[5] }}';
+            document.getElementById('last_name').value = '{{ usuario[6] }}';
+            document.getElementById('user_type').value = '{{ usuario[3] }}';
+            document.getElementById('password').value = '';
+            document.getElementById('confirm_password').value = '';
+            previewUser();
+        }
+    }
+
+    function previewUser() {
+        const email = document.getElementById('email').value;
+        const firstName = document.getElementById('first_name').value;
+        const lastName = document.getElementById('last_name').value;
+        const userType = document.getElementById('user_type').value;
+
+        if (!email || !firstName || !lastName || !userType) {
+            alert('Por favor, preencha todos os campos obrigatórios para ver a pré-visualização.');
+            return;
+        }
+
+        const userTypeDisplay = {
+            'aluno': '👨‍🎓 Aluno',
+            'professor': '👨‍🏫 Professor',
+            'admin': '👨‍💼 Administrador'
+        };
+
+        const userTypeColor = {
+            'aluno': 'success',
+            'professor': 'info',
+            'admin': 'warning'
+        };
+
+        document.getElementById('userPreview').innerHTML = `
+        <div class="text-center">
+            <div class="avatar-preview mb-3">
+                <i class="fas fa-user-circle fa-4x text-primary"></i>
+            </div>
+            <h5 class="mb-1">${firstName} ${lastName}</h5>
+            <p class="text-muted mb-2">@{{ usuario[1] }}</p>
+            <span class="badge bg-${userTypeColor[userType]} mb-2">
+                ${userTypeDisplay[userType]}
+            </span>
+            <p class="text-muted small mb-0">${email}</p>
+            <p class="text-muted small mb-0">Criado em {{ format_datetime(usuario[4], '%d/%m/%Y') }}</p>
+        </div>
+    `;
+    }
+
+    function resetPassword() {
+        if (confirm('Tem certeza que deseja redefinir a senha do usuário?')) {
+            const newPassword = prompt('Digite a nova senha (mínimo 6 caracteres):');
+            if (newPassword && newPassword.length >= 6) {
+                document.getElementById('password').value = newPassword;
+                document.getElementById('confirm_password').value = newPassword;
+                alert('Senha redefinida! Clique em "Salvar Alterações" para aplicar.');
+            } else if (newPassword !== null) {
+                alert('A senha deve ter pelo menos 6 caracteres!');
+            }
+        }
+    }
+
+    function toggleUserStatus() {
+        alert('Funcionalidade de ativação/desativação será implementada em breve!');
+    }
+
+    function confirmDelete() {
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    // Validação de senha
+    document.getElementById('confirm_password').addEventListener('input', function () {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+
+        if (password && confirmPassword && password !== confirmPassword) {
+            this.setCustomValidity('As senhas não coincidem');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    // Validação do formulário
+    document.getElementById('editUserForm').addEventListener('submit', function (e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        if (password && confirmPassword && password !== confirmPassword) {
+            e.preventDefault();
+            alert('As senhas não coincidem!');
+            return false;
+        }
+
+        if (password && password.length < 6) {
+            e.preventDefault();
+            alert('A senha deve ter pelo menos 6 caracteres!');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

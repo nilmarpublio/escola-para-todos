@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}{{ aula[1] }} - EduApp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_aulas') }}">
+                            <i class="fas fa-book me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="fas fa-play me-2"></i>{{ aula[1] }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mt-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('student_dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('student_aulas') }}">Minhas Aulas</a></li>
+                    <li class="breadcrumb-item active">{{ aula[1] }}</li>
+                </ol>
+            </nav>
+
+            <!-- Header da Aula -->
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div>
+                    <h1 class="h2">
+                        <i class="fas fa-play-circle me-2"></i>{{ aula[1] }}
+                    </h1>
+                    <p class="text-muted mb-0">
+                        <span class="badge bg-primary">{{ aula[3] }}</span>
+                        <span class="badge bg-info">{{ aula[2] }}</span>
+                        {% if aula[6] %}
+                            <span class="badge bg-success">{{ aula[6] }} pontos</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        {% if not aula[6] or aula[6] == 'nao_iniciado' %}
+                            <form method="POST" action="{{ url_for('iniciar_aula', aula_id=aula[0]) }}" class="d-inline">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-play me-1"></i>Iniciar Aula
+                                </button>
+                            </form>
+                        {% elif aula[6] == 'em_andamento' %}
+                            <form method="POST" action="{{ url_for('concluir_aula', aula_id=aula[0]) }}" class="d-inline">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check me-1"></i>Concluir Aula
+                                </button>
+                            </form>
+                        {% elif aula[6] == 'concluido' %}
+                            <span class="badge bg-success fs-6">✅ Aula Concluída</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descrição da Aula -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-info-circle me-2"></i>Sobre esta Aula
+                            </h5>
+                            <p class="card-text">{{ aula[2] }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player de Vídeo -->
+            {% if aula[5] %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-video me-2"></i>Vídeo da Aula
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="ratio ratio-16x9">
+                                <iframe src="{{ aula[5] }}" 
+                                        title="{{ aula[1] }}" 
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowfullscreen>
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-video fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Vídeo não disponível</h5>
+                            <p class="text-muted">Esta aula não possui vídeo associado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Exercícios da Aula -->
+            {% if exercicios %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clipboard-list me-2"></i>Exercícios da Aula
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for exercicio in exercicios %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Exercício {{ loop.index }}</h6>
+                                            <p class="card-text small text-muted">
+                                                {{ exercicio[1][:80] }}{% if exercicio[1]|length > 80 %}...{% endif %}
+                                            </p>
+                                            <a href="{{ url_for('fazer_exercicio', exercicio_id=exercicio[0]) }}" 
+                                               class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-pencil-alt me-1"></i>Fazer Exercício
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Progresso da Aula -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Seu Progresso
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 text-center mb-3">
+                                    <div class="progress-circle">
+                                        {% if aula[6] == 'concluido' %}
+                                            <div class="progress-circle-value">100%</div>
+                                        {% elif aula[6] == 'em_andamento' %}
+                                            <div class="progress-circle-value">50%</div>
+                                        {% else %}
+                                            <div class="progress-circle-value">0%</div>
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="mt-2">Progresso Geral</h6>
+                                </div>
+                                <div class="col-md-4 text-center mb-3">
+                                    <div class="display-6 text-primary">
+                                        {% if aula[7] %}{{ aula[7] }}{% else %}0{% endif %}
+                                    </div>
+                                    <h6>Pontos</h6>
+                                </div>
+                                <div class="col-md-4 text-center mb-3">
+                                    <div class="display-6 text-success">
+                                        {% if exercicios %}{{ exercicios|length }}{% else %}0{% endif %}
+                                    </div>
+                                    <h6>Exercícios</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações da Aula -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class="fas fa-cogs me-2"></i>Ações da Aula
+                            </h5>
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% if not aula[6] or aula[6] == 'nao_iniciado' %}
+                                    <form method="POST" action="{{ url_for('iniciar_aula', aula_id=aula[0]) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-play me-1"></i>Iniciar Aula
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                
+                                {% if aula[6] == 'em_andamento' %}
+                                    <form method="POST" action="{{ url_for('concluir_aula', aula_id=aula[0]) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-check me-1"></i>Concluir Aula
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                
+                                {% if exercicios %}
+                                    <a href="#" class="btn btn-outline-info">
+                                        <i class="fas fa-clipboard-list me-1"></i>Ver Todos os Exercícios
+                                    </a>
+                                {% endif %}
+                                
+                                <a href="{{ url_for('student_aulas') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Voltar às Aulas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .progress-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: conic-gradient(#007bff 0deg, #e9ecef 0deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .progress-circle-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.375rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        border-radius: 0.375rem 0.375rem 0 0 !important;
+        border: none;
+    }
+
+    .btn {
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+    }
+</style>
+
+<script>
+// Atualizar progresso do círculo baseado no status da aula
+document.addEventListener('DOMContentLoaded', function() {
+    const status = '{{ aula[6] }}';
+    const progressCircle = document.querySelector('.progress-circle');
+    
+    if (status === 'concluido') {
+        progressCircle.style.background = 'conic-gradient(#28a745 0deg, #28a745 360deg)';
+    } else if (status === 'em_andamento') {
+        progressCircle.style.background = 'conic-gradient(#ffc107 0deg, #ffc107 180deg, #e9ecef 180deg)';
+    } else {
+        progressCircle.style.background = 'conic-gradient(#e9ecef 0deg, #e9ecef 360deg)';
+    }
+});
+</script>
+{% endblock %}
