@@ -13,5 +13,7 @@ services:
         value: 0
       - key: PYTHONPATH
         value: /opt/render/project/src
+      - key: FLASK_APP
+        value: app_clean.py
     healthCheckPath: /
     autoDeploy: true
