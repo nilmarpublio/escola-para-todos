@@ -4,13 +4,16 @@ echo "📁 Diretório atual: $(pwd)"
 echo "📋 Arquivos disponíveis:"
 ls -la
 
-echo "🐍 Executando gunicorn com app_minimal:app..."
-echo "📝 Verificando se app_minimal.py existe..."
-if [ -f "app_minimal.py" ]; then
-    echo "✅ app_minimal.py encontrado!"
-    exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 app_minimal:app
+echo "🗄️ Inicializando banco PostgreSQL..."
+python init_db_postgres.py
+
+echo "🐍 Executando gunicorn com app_postgres:app..."
+echo "📝 Verificando se app_postgres.py existe..."
+if [ -f "app_postgres.py" ]; then
+    echo "✅ app_postgres.py encontrado!"
+    exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 app_postgres:app
 else
-    echo "❌ app_minimal.py não encontrado!"
+    echo "❌ app_postgres.py não encontrado!"
     echo "📋 Arquivos Python disponíveis:"
     ls -la *.py
     exit 1
