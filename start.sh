@@ -1,20 +1,56 @@
 #!/bin/bash
-echo "🚀 Iniciando Escola para Todos..."
+set -e  # Parar se houver erro
+
+echo "🚀 =========================================="
+echo "🚀 INICIANDO ESCOLA PARA TODOS NO RENDER"
+echo "🚀 =========================================="
 echo "📁 Diretório atual: $(pwd)"
 echo "📋 Arquivos disponíveis:"
 ls -la
 
-echo "🗄️ Inicializando banco PostgreSQL..."
-python init_db_postgres.py
+echo ""
+echo "🗄️ =========================================="
+echo "🗄️ INICIALIZANDO BANCO POSTGRESQL"
+echo "🗄️ =========================================="
 
-echo "🐍 Executando gunicorn com app_postgres:app..."
-echo "📝 Verificando se app_postgres.py existe..."
-if [ -f "app_postgres.py" ]; then
-    echo "✅ app_postgres.py encontrado!"
-    exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 app_postgres:app
+# Verificar se DATABASE_URL está configurada
+if [ -z "$DATABASE_URL" ]; then
+    echo "❌ ERRO: DATABASE_URL não está configurada!"
+    echo "📋 Variáveis de ambiente disponíveis:"
+    env | grep -E "(DATABASE|FLASK|SECRET)" || echo "Nenhuma variável relevante encontrada"
+    exit 1
 else
-    echo "❌ app_postgres.py não encontrado!"
+    echo "✅ DATABASE_URL configurada: ${DATABASE_URL:0:20}..."
+fi
+
+# Verificar se init_db_postgres.py existe
+if [ ! -f "init_db_postgres.py" ]; then
+    echo "❌ ERRO: init_db_postgres.py não encontrado!"
     echo "📋 Arquivos Python disponíveis:"
     ls -la *.py
     exit 1
 fi
+
+echo "🐍 Executando init_db_postgres.py..."
+python init_db_postgres.py
+
+echo ""
+echo "🌐 =========================================="
+echo "🌐 INICIANDO APLICAÇÃO FLASK"
+echo "🌐 =========================================="
+
+# Verificar se app_postgres.py existe
+if [ ! -f "app_postgres.py" ]; then
+    echo "❌ ERRO: app_postgres.py não encontrado!"
+    echo "📋 Arquivos Python disponíveis:"
+    ls -la *.py
+    exit 1
+fi
+
+echo "✅ app_postgres.py encontrado!"
+echo "🚀 Iniciando gunicorn com app_postgres:app..."
+echo "📊 Porta: $PORT"
+echo "🌍 Workers: 1"
+echo "⏱️ Timeout: 120s"
+
+exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 app_postgres:app
