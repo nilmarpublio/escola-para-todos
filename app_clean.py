@@ -75,7 +75,32 @@ def home():
                 <a href="/version">📋 Versão</a>
                 <a href="/test">🧪 Teste</a>
                 <a href="/info">ℹ️ Informações</a>
+                <a href="/login-test">🔐 Teste Login</a>
             </div>
+        </div>
+    </body>
+    </html>
+    '''
+
+@app.route('/login-test')
+def login_test():
+    """Página de teste de login sem banco"""
+    return '''
+    <html>
+    <head><title>Teste de Login</title></head>
+    <body style="font-family: Arial, sans-serif; margin: 40px; background: #f0f0f0;">
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h1 style="color: #28a745;">🔐 Teste de Login</h1>
+            <h2>Página funcionando sem banco!</h2>
+            <p>Esta página não depende de banco de dados.</p>
+            <p>Se você está vendo isso, a aplicação está funcionando!</p>
+            <ul>
+                <li>✅ Flask funcionando</li>
+                <li>✅ Rotas respondendo</li>
+                <li>✅ Render funcionando</li>
+                <li>✅ Deploy bem-sucedido</li>
+            </ul>
+            <a href="/" style="color: #007bff;">← Voltar ao início</a>
         </div>
     </body>
     </html>

@@ -1,0 +1,19 @@
+# Configurações para PostgreSQL - Escola para Todos
+# Copie este arquivo para .env e ajuste os valores
+
+# Configurações da Aplicação
+FLASK_ENV=development
+FLASK_DEBUG=1
+SECRET_KEY=dev-secret-key-change-in-production
+
+# Configurações do Banco PostgreSQL Local
+DB_HOST=localhost
+DB_NAME=escola_para_todos
+DB_USER=escola_user
+DB_PASSWORD=escola123
+
+# Para produção no Render, o DATABASE_URL será fornecido automaticamente
+# DATABASE_URL=postgresql://user:password@host:port/database
+
+# Exemplo de DATABASE_URL do Render:
+# DATABASE_URL=postgresql://escola_user:password123@dpg-abc123-a.oregon-postgres.render.com/escola_para_todos
