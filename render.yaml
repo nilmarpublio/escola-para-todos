@@ -3,10 +3,16 @@ services:
     name: escola-para-todos
     runtime: python
     plan: free
-    buildCommand: pip install Flask
-    startCommand: python app_simple.py
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app_postgres.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: 0
     healthCheckPath: /
     autoDeploy: true
