@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 from datetime import datetime
 
 class User(UserMixin):
@@ -98,7 +98,7 @@ class User(UserMixin):
         cur = db.cursor()
         cur.execute('''
             SELECT id, username, email, first_name, last_name, user_type, is_active, created_at, updated_at
-            FROM users WHERE username = %s
+            FROM users WHERE id = %s
         ''', (username,))
         user_data = cur.fetchone()
         cur.close()
@@ -113,7 +113,7 @@ class User(UserMixin):
         cur = db.cursor()
         cur.execute('''
             SELECT id, username, email, first_name, last_name, user_type, is_active, created_at, updated_at
-            FROM users WHERE email = %s
+            FROM users WHERE id = %s
         ''', (email,))
         user_data = cur.fetchone()
         cur.close()

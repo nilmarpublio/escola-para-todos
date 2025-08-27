@@ -4,8 +4,8 @@ from flask_restful import Api
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 from dotenv import load_dotenv
 
 # Importar modelos e autenticação
@@ -65,15 +65,15 @@ def get_db():
         database_url = os.getenv('DATABASE_URL')
         if database_url:
             # Render usa DATABASE_URL
-            g.db = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+            g.db = psycopg.connect(database_url, row_factory=dict_row)
         else:
             # Configuração local
-            g.db = psycopg2.connect(
+            g.db = psycopg.connect(
                 host=os.getenv('DB_HOST', 'localhost'),
-                database=os.getenv('DB_NAME', 'escola_para_todos'),
+                dbname=os.getenv('DB_NAME', 'escola_para_todos'),
                 user=os.getenv('DB_USER', 'escola_user'),
                 password=os.getenv('DB_PASSWORD', ''),
-                cursor_factory=RealDictCursor
+                row_factory=dict_row
             )
     return g.db
 
