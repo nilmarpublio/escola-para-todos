@@ -5,7 +5,28 @@ from psycopg.rows import dict_row
 from datetime import datetime
 
 class User(UserMixin):
-    """Modelo de usuário com PostgreSQL"""
+    """Modelo de usuário com Flask-Login"""
+    
+    @staticmethod
+    def _get_placeholder():
+        """Retorna o placeholder correto baseado no tipo de banco"""
+        # Por padrão, usar ? (SQLite) se não conseguir detectar PostgreSQL
+        return '?'
+    
+    @staticmethod
+    def _detect_db_type(db):
+        """Detecta o tipo de banco de dados"""
+        try:
+            # Tentar detectar PostgreSQL
+            if hasattr(db, 'dialect') and db.dialect.name == 'postgresql':
+                return 'postgresql'
+            # Verificar se é psycopg
+            elif 'psycopg' in str(type(db)):
+                return 'postgresql'
+            else:
+                return 'sqlite'
+        except:
+            return 'sqlite'
     
     def __init__(self, id, username, email, first_name, last_name, user_type, is_active=True, created_at=None, updated_at=None):
         self.id = id
@@ -126,10 +147,16 @@ class User(UserMixin):
     def authenticate(username, password, db):
         """Autentica usuário"""
         cur = db.cursor()
-        cur.execute('''
+        
+        # Detectar tipo de banco e usar sintaxe correta
+        db_type = User._detect_db_type(db)
+        placeholder = '%s' if db_type == 'postgresql' else '?'
+        
+        cur.execute(f'''
             SELECT id, username, email, first_name, last_name, user_type, is_active, created_at, updated_at, password_hash
-            FROM users WHERE username = %s
+            FROM users WHERE username = {placeholder}
         ''', (username,))
+            
         user_data = cur.fetchone()
         cur.close()
         

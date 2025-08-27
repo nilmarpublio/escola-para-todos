@@ -1,55 +1,23 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, session, g, abort, jsonify
+from flask import Flask, render_template, redirect, url_for, flash, request, session, g, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_restful import Api
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
-import traceback
-import sys
+import sqlite3
 
-# Tratamento de erros de import
-try:
-    import psycopg
-    from psycopg.rows import dict_row
-    PSYCOPG_AVAILABLE = True
-except ImportError as e:
-    print(f"⚠️ psycopg não disponível: {e}")
-    PSYCOPG_AVAILABLE = False
+# Configurações locais (sem dotenv)
+os.environ['FLASK_ENV'] = 'development'
+os.environ['FLASK_DEBUG'] = '1'
+os.environ['SECRET_KEY'] = 'dev-secret-key-change-in-production'
 
-try:
-    from models_postgres import User
-    MODELS_AVAILABLE = True
-except ImportError as e:
-    print(f"⚠️ models_postgres não disponível: {e}")
-    MODELS_AVAILABLE = False
+# Importar modelos e autenticação
+from models import User
+from auth import admin_required, professor_required, aluno_required, content_creator_required, user_management_required, analytics_required, guest_required
 
-try:
-    from auth import admin_required, professor_required, aluno_required, content_creator_required, user_management_required, analytics_required, guest_required
-    AUTH_AVAILABLE = True
-except ImportError as e:
-    print(f"⚠️ auth não disponível: {e}")
-    AUTH_AVAILABLE = False
-
-try:
-    from api.turmas import register_turmas_api
-    API_TURMAS_AVAILABLE = True
-except ImportError as e:
-    print(f"⚠️ api.turmas não disponível: {e}")
-    API_TURMAS_AVAILABLE = False
-
-try:
-    from api.swagger import create_swagger_blueprint, get_swagger_spec
-    SWAGGER_AVAILABLE = True
-except ImportError as e:
-    print(f"⚠️ api.swagger não disponível: {e}")
-    SWAGGER_AVAILABLE = False
-
-# Carregar variáveis de ambiente
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    print("⚠️ python-dotenv não disponível")
+# Importar API e Swagger
+from api.turmas import register_turmas_api
+from api.swagger import create_swagger_blueprint, get_swagger_spec
 
 # Inicialização da aplicação
 app = Flask(__name__)
@@ -57,34 +25,23 @@ app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Configurações da aplicação
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 horas
-app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
+app.config['SESSION_COOKIE_SECURE'] = False  # False para desenvolvimento
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
-# Configuração do Flask-Login (se disponível)
-if AUTH_AVAILABLE:
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-    login_manager.login_view = 'login'
-    login_manager.login_message = '🔐 Por favor, faça login para acessar esta página.'
-    login_manager.login_message_category = 'info'
-else:
-    print("⚠️ Flask-Login não configurado - auth não disponível")
+# Configuração do Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = '🔐 Por favor, faça login para acessar esta página.'
+login_manager.login_message_category = 'info'
 
-# Configuração da API REST (se disponível)
-if API_TURMAS_AVAILABLE:
-    api = Api(app, prefix='/api')
-    # Registrar endpoints da API
-    register_turmas_api(api)
-else:
-    print("⚠️ API REST não configurada - api.turmas não disponível")
+# Configuração da API REST
+api = Api(app, prefix='/api', decorators=[login_required])
 
-# Configuração do Swagger (se disponível)
-if SWAGGER_AVAILABLE:
-    swagger_blueprint = create_swagger_blueprint()
-    app.register_blueprint(swagger_blueprint)
-else:
-    print("⚠️ Swagger não configurado - api.swagger não disponível")
+# Configuração do Swagger
+swagger_blueprint = create_swagger_blueprint()
+app.register_blueprint(swagger_blueprint)
 
 # Funções auxiliares para os templates
 @app.context_processor
@@ -114,7 +71,7 @@ def swagger_spec():
     return get_swagger_spec()
 
 # Registrar endpoints da API
-# register_turmas_api(api) # Moved to above
+register_turmas_api(api)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -123,22 +80,11 @@ def load_user(user_id):
     return User.get_by_id(int(user_id), db)
 
 def get_db():
-    """Conectar ao banco de dados PostgreSQL"""
+    """Conectar ao banco SQLite"""
     if 'db' not in g:
-        # Usar DATABASE_URL do Render ou configuração local
-        database_url = os.getenv('DATABASE_URL')
-        if database_url:
-            # Render usa DATABASE_URL
-            g.db = psycopg.connect(database_url, row_factory=dict_row)
-        else:
-            # Configuração local
-            g.db = psycopg.connect(
-                host=os.getenv('DB_HOST', 'localhost'),
-                dbname=os.getenv('DB_NAME', 'escola_para_todos'),
-                user=os.getenv('DB_USER', 'escola_user'),
-                password=os.getenv('DB_PASSWORD', ''),
-                row_factory=dict_row
-            )
+        g.db = sqlite3.connect('escola_para_todos.db')
+        g.db.row_factory = sqlite3.Row
+        g.db_type = 'sqlite'
     return g.db
 
 def close_db(e=None):
@@ -159,40 +105,30 @@ def splash():
     return render_template('splash.html')
 
 @app.route('/login', methods=['GET', 'POST'])
+@guest_required
 def login():
     """Página de login"""
-    if not AUTH_AVAILABLE:
-        return "Sistema de autenticação não disponível", 500
-    
     if request.method == 'POST':
-        try:
-            username = request.form['username']
-            password = request.form['password']
+        username = request.form['username']
+        password = request.form['password']
+        
+        db = get_db()
+        # Usar o método authenticate que verifica a senha
+        user = User.authenticate(username, password, db)
+        
+        if user:
+            login_user(user)
+            flash(f'🎉 Bem-vindo, {user.first_name}!', 'success')
             
-            db = get_db()
-            if not db:
-                flash('❌ Erro de conexão com banco de dados', 'error')
-                return render_template('login.html')
-            
-            # Usar o método authenticate que verifica a senha
-            user = User.authenticate(username, password, db)
-            
-            if user:
-                login_user(user)
-                flash(f'🎉 Bem-vindo, {user.first_name}!', 'success')
-                
-                # Redirecionar baseado no tipo de usuário
-                if user.is_admin:
-                    return redirect(url_for('admin_dashboard'))
-                elif user.is_professor:
-                    return redirect(url_for('professor_dashboard'))
-                else:
-                    return redirect(url_for('student_dashboard'))
+            # Redirecionar baseado no tipo de usuário
+            if user.is_admin:
+                return redirect(url_for('admin_dashboard'))
+            elif user.is_professor:
+                return redirect(url_for('professor_dashboard'))
             else:
-                flash('❌ Usuário ou senha incorretos!', 'error')
-        except Exception as e:
-            print(f"❌ Erro no login: {e}")
-            flash('❌ Erro interno no sistema', 'error')
+                return redirect(url_for('student_dashboard'))
+        else:
+            flash('❌ Usuário ou senha incorretos!', 'error')
     
     return render_template('login.html')
 
@@ -201,73 +137,53 @@ def login():
 def register():
     """Página de registro"""
     if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        user_type = request.form.get('user_type', 'aluno')
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        user_type = request.form['user_type']
         
-        # Validações
-        if not all([username, email, password, confirm_password, first_name, last_name]):
-            flash('❌ Por favor, preencha todos os campos.', 'error')
+        db = get_db()
+        
+        # Verificar se usuário já existe
+        if User.get_by_username(username, db):
+            flash('❌ Usuário já existe!', 'error')
             return render_template('register.html')
         
-        if password != confirm_password:
-            flash('❌ As senhas não coincidem.', 'error')
+        if User.get_by_email(email, db):
+            flash('❌ Email já cadastrado!', 'error')
             return render_template('register.html')
         
-        if len(password) < 6:
-            flash('❌ A senha deve ter pelo menos 6 caracteres.', 'error')
-            return render_template('register.html')
+        # Criar novo usuário
+        user = User(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            user_type=user_type
+        )
+        user.set_password(password)
         
-        # Validar tipo de usuário (apenas alunos podem se registrar)
-        if user_type != 'aluno':
-            flash('❌ Apenas alunos podem se registrar. Professores e administradores são criados pelo admin.', 'error')
-            return render_template('register.html')
-        
-        try:
-            db = get_db()
-            
-            # Verificar se username já existe
-            if User.get_by_username(username, db):
-                flash('❌ Este username já está em uso.', 'error')
-                return render_template('register.html')
-            
-            # Verificar se email já existe
-            if User.get_by_email(email, db):
-                flash('❌ Este email já está em uso.', 'error')
-                return render_template('register.html')
-            
-            # Criar usuário
-            user = User.create_user(username, email, password, first_name, last_name, user_type, db)
-            
-            flash('✅ Conta criada com sucesso! Faça login para continuar.', 'success')
+        if user.save(db):
+            flash('✅ Usuário criado com sucesso! Faça login.', 'success')
             return redirect(url_for('login'))
-            
-        except Exception as e:
-            flash(f'❌ Erro ao criar conta: {str(e)}', 'error')
+        else:
+            flash('❌ Erro ao criar usuário!', 'error')
     
     return render_template('register.html')
-
-# =====================================================
-# ROTAS AUTENTICADAS
-# =====================================================
 
 @app.route('/logout')
 @login_required
 def logout():
     """Logout do usuário"""
     logout_user()
-    flash('👋 Você foi desconectado com sucesso.', 'info')
+    flash('👋 Logout realizado com sucesso!', 'info')
     return redirect(url_for('splash'))
 
-@app.route('/profile')
-@login_required
-def profile():
-    """Perfil do usuário"""
-    return render_template('profile.html')
+# =====================================================
+# ROTAS PROTEGIDAS - ADMIN
+# =====================================================
 
 @app.route('/admin/dashboard')
 @admin_required
@@ -314,6 +230,16 @@ def admin_criar_usuario():
 def admin_editar_usuario(user_id):
     """Editar usuário existente"""
     return render_template('admin_editar_usuario.html', user_id=user_id)
+
+# =====================================================
+# ROTAS PROTEGIDAS - PROFESSOR
+# =====================================================
+
+@app.route('/professor/dashboard')
+@professor_required
+def professor_dashboard():
+    """Dashboard do professor"""
+    return render_template('professor_dashboard.html')
 
 @app.route('/professor/turmas')
 @professor_required
@@ -362,6 +288,16 @@ def professor_criar_aula():
 def professor_editar_aula(aula_id):
     """Editar aula existente"""
     return render_template('professor_editar_aula.html', aula_id=aula_id)
+
+# =====================================================
+# ROTAS PROTEGIDAS - ALUNO
+# =====================================================
+
+@app.route('/student/dashboard')
+@aluno_required
+def student_dashboard():
+    """Dashboard do aluno"""
+    return render_template('student_dashboard.html')
 
 @app.route('/student/turmas')
 @aluno_required
@@ -417,6 +353,16 @@ def student_gamificacao():
     """Gamificação do aluno"""
     return render_template('student_gamificacao.html')
 
+# =====================================================
+# ROTAS PROTEGIDAS - PERFIL
+# =====================================================
+
+@app.route('/profile')
+@login_required
+def profile():
+    """Perfil do usuário"""
+    return render_template('profile.html')
+
 @app.route('/profile/edit')
 @login_required
 def edit_profile():
@@ -428,6 +374,10 @@ def edit_profile():
 def change_password():
     """Alterar senha"""
     return render_template('change_password.html')
+
+# =====================================================
+# ROTAS PÚBLICAS - FÓRUM
+# =====================================================
 
 @app.route('/forum')
 def forum():
@@ -450,12 +400,73 @@ def forum_busca():
     """Busca no fórum"""
     return render_template('forum_busca.html')
 
+# =====================================================
+# ROTAS PROTEGIDAS - LIÇÕES
+# =====================================================
+
 @app.route('/lesson/<int:lesson_id>')
 @login_required
 def lesson(lesson_id):
     """Lição específica"""
     return render_template('lesson.html', lesson_id=lesson_id)
 
+# =====================================================
+# ROTAS DE TESTE
+# =====================================================
+
+@app.route('/health')
+def health():
+    """Health check da aplicação"""
+    db = get_db()
+    db_type = getattr(g, 'db_type', 'unknown')
+    
+    return {
+        'status': 'healthy',
+        'database': db_type,
+        'timestamp': datetime.now().isoformat(),
+        'environment': os.getenv('FLASK_ENV', 'development')
+    }
+
+@app.route('/version')
+def version():
+    """Versão da aplicação"""
+    return {
+        'app': 'Escola para Todos',
+        'version': '2.0.0',
+        'database': 'SQLite (Local)',
+        'environment': os.getenv('FLASK_ENV', 'development')
+    }
+
+@app.route('/test')
+def test():
+    """Página de teste"""
+    return render_template('splash.html')
+
+@app.route('/info')
+def info():
+    """Informações do sistema"""
+    db = get_db()
+    db_type = getattr(g, 'db_type', 'unknown')
+    
+    return {
+        'database_type': db_type,
+        'database_connected': db is not None,
+        'environment': os.getenv('FLASK_ENV', 'development'),
+        'debug_mode': os.getenv('FLASK_DEBUG', '0'),
+        'secret_key_set': bool(os.getenv('SECRET_KEY')),
+        'database_url_set': bool(os.getenv('DATABASE_URL'))
+    }
+
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    # Verificar se o banco SQLite existe, se não, criar
+    if not os.path.exists('escola_para_todos.db'):
+        print("🗄️ Banco SQLite não encontrado. Criando...")
+        import init_db
+        init_db.init_database()
+        print("✅ Banco SQLite criado com sucesso!")
+    
+    print("🚀 Iniciando Escola para Todos (SQLite)")
+    print("📊 Banco: SQLite local")
+    print("🌍 Ambiente:", os.getenv('FLASK_ENV', 'development'))
+    
+    app.run(debug=True, host='0.0.0.0', port=5000)
