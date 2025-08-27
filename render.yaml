@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python app_postgres.py
+    startCommand: python app_render.py
     envVars:
       - key: SECRET_KEY
         generateValue: true
