@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: ./start.sh
+    startCommand: python init_db_postgres.py && gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 app_postgres:app
     envVars:
       - key: FLASK_APP
         value: app_postgres.py
