@@ -8,7 +8,7 @@ import sqlite3
 from dotenv import load_dotenv
 
 # Importar modelos e autenticação
-from models_postgres import User
+from models import User
 from auth import admin_required, professor_required, aluno_required, content_creator_required, user_management_required, analytics_required, guest_required
 
 # Importar API e Swagger
