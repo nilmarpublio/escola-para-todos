@@ -475,6 +475,11 @@ def forum_busca():
     """Busca no fórum"""
     return render_template('forum_busca.html')
 
+@app.route('/forum/buscar')
+def forum_buscar():
+    """Busca no fórum (alias para forum_busca)"""
+    return redirect(url_for('forum_busca'))
+
 # =====================================================
 # ROTAS PROTEGIDAS - LIÇÕES
 # =====================================================
