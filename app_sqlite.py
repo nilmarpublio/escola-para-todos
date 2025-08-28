@@ -208,6 +208,36 @@ def profile():
     """Perfil do usuário"""
     return render_template('profile.html')
 
+@app.route('/admin/usuarios')
+@admin_required
+def admin_usuarios():
+    """Gerenciar usuários (admin)"""
+    return render_template('admin_usuarios.html')
+
+@app.route('/admin/relatorios')
+@admin_required
+def admin_relatorios():
+    """Relatórios administrativos"""
+    return render_template('admin_relatorios.html')
+
+@app.route('/forum')
+@login_required
+def forum():
+    """Fórum da comunidade"""
+    return render_template('forum.html')
+
+@app.route('/profile/edit')
+@login_required
+def edit_profile():
+    """Editar perfil do usuário"""
+    return render_template('edit_profile.html')
+
+@app.route('/profile/change-password')
+@login_required
+def change_password():
+    """Alterar senha do usuário"""
+    return render_template('change_password.html')
+
 # =====================================================
 # ROTAS DE TESTE
 # =====================================================
