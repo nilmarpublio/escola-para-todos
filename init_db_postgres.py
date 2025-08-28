@@ -18,7 +18,44 @@ def get_db_connection():
     database_url = os.getenv('DATABASE_URL')
     if database_url:
         # Render usa DATABASE_URL
-        return psycopg.connect(database_url, row_factory=dict_row)
+        try:
+            # Tentar conectar diretamente
+            return psycopg.connect(database_url, row_factory=dict_row)
+        except Exception as e:
+            print(f"❌ Erro ao conectar com DATABASE_URL: {e}")
+            print(f"📋 DATABASE_URL: {database_url}")
+            
+            # Tentar parsear a URL manualmente
+            try:
+                from urllib.parse import urlparse
+                parsed = urlparse(database_url)
+                
+                # Extrair componentes
+                host = parsed.hostname
+                port = parsed.port or 5432
+                dbname = parsed.path[1:]  # Remove a barra inicial
+                username = parsed.username
+                password = parsed.password
+                
+                print(f"🔍 Componentes extraídos:")
+                print(f"   Host: {host}")
+                print(f"   Port: {port}")
+                print(f"   Database: {dbname}")
+                print(f"   Username: {username}")
+                print(f"   Password: {'*' * len(password) if password else 'None'}")
+                
+                # Conectar com componentes separados
+                return psycopg.connect(
+                    host=host,
+                    port=port,
+                    dbname=dbname,
+                    user=username,
+                    password=password,
+                    row_factory=dict_row
+                )
+            except Exception as e2:
+                print(f"❌ Erro ao parsear URL manualmente: {e2}")
+                raise e
     else:
         # Configuração local
         return psycopg.connect(
