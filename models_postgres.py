@@ -110,7 +110,7 @@ class User(UserMixin):
         cur.close()
         
         if user_data:
-            return User(*user_data)
+            return User(**user_data)
         return None
     
     @staticmethod
@@ -125,7 +125,7 @@ class User(UserMixin):
         cur.close()
         
         if user_data:
-            return User(*user_data)
+            return User(**user_data)
         return None
     
     @staticmethod
@@ -134,13 +134,13 @@ class User(UserMixin):
         cur = db.cursor()
         cur.execute('''
             SELECT id, username, email, first_name, last_name, user_type, is_active, created_at, updated_at
-            FROM users WHERE id = %s
+            FROM users WHERE email = %s
         ''', (email,))
         user_data = cur.fetchone()
         cur.close()
         
         if user_data:
-            return User(*user_data)
+            return User(**user_data)
         return None
     
     @staticmethod
@@ -197,7 +197,7 @@ class User(UserMixin):
         users_data = cur.fetchall()
         cur.close()
         
-        return [User(*user_data) for user_data in users_data]
+        return [User(**user_data) for user_data in users_data]
     
     def update_profile(self, first_name, last_name, email, db):
         """Atualiza perfil do usuário"""

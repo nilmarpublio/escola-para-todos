@@ -135,8 +135,8 @@ def get_db():
             g.db = psycopg.connect(
                 host=os.getenv('DB_HOST', 'localhost'),
                 dbname=os.getenv('DB_NAME', 'escola_para_todos'),
-                user=os.getenv('DB_USER', 'escola_user'),
-                password=os.getenv('DB_PASSWORD', ''),
+                user=os.getenv('DB_USER', 'postgres'),
+                password=os.getenv('DB_PASSWORD', 'postgres'),
                 row_factory=dict_row
             )
     return g.db
@@ -170,26 +170,37 @@ def login():
             username = request.form['username']
             password = request.form['password']
             
+            print(f"🔍 DEBUG: Tentativa de login - Username: '{username}', Senha: '{password[:3]}...'")
+            
             db = get_db()
             if not db:
+                print("❌ DEBUG: Falha na conexão com banco de dados")
                 flash('❌ Erro de conexão com banco de dados', 'error')
                 return render_template('login.html')
             
+            print("✅ DEBUG: Conexão com banco estabelecida")
+            
             # Usar o método authenticate que verifica a senha
+            print(f"🔐 DEBUG: Chamando User.authenticate('{username}', '***', db)")
             user = User.authenticate(username, password, db)
             
             if user:
+                print(f"✅ DEBUG: Usuário autenticado com sucesso: {user.username} ({user.user_type})")
                 login_user(user)
                 flash(f'🎉 Bem-vindo, {user.first_name}!', 'success')
                 
                 # Redirecionar baseado no tipo de usuário
                 if user.is_admin:
+                    print("🔄 DEBUG: Redirecionando para admin_dashboard")
                     return redirect(url_for('admin_dashboard'))
                 elif user.is_professor:
+                    print("🔄 DEBUG: Redirecionando para professor_dashboard")
                     return redirect(url_for('professor_dashboard'))
                 else:
+                    print("🔄 DEBUG: Redirecionando para student_dashboard")
                     return redirect(url_for('student_dashboard'))
             else:
+                print(f"❌ DEBUG: Falha na autenticação para username: '{username}'")
                 flash('❌ Usuário ou senha incorretos!', 'error')
         except Exception as e:
             print(f"❌ Erro no login: {e}")
@@ -268,7 +279,63 @@ def logout():
 @admin_required
 def admin_dashboard():
     """Dashboard administrativo"""
-    return render_template('admin_dashboard.html')
+    try:
+        db = get_db()
+        
+        # Estatísticas básicas
+        cur = db.cursor()
+        
+        # Contar usuários por tipo
+        cur.execute('SELECT user_type, COUNT(*) FROM users GROUP BY user_type')
+        user_stats_raw = cur.fetchall()
+        user_stats = {row['user_type']: row['count'] for row in user_stats_raw}
+        
+        # Contar turmas
+        cur.execute('SELECT COUNT(*) FROM turmas')
+        turmas_count = cur.fetchone()['count']
+        
+        # Contar aulas
+        cur.execute('SELECT COUNT(*) FROM aulas')
+        aulas_count = cur.fetchone()['count']
+        
+        # Contar matrículas
+        cur.execute('SELECT COUNT(*) FROM matriculas')
+        matriculas_count = cur.fetchone()['count']
+        
+        # Contar exercícios
+        cur.execute('SELECT COUNT(*) FROM exercicios')
+        exercicios_count = cur.fetchone()['count']
+        
+        cur.close()
+        
+        # Preparar dados para o template
+        stats = {
+            'total_users': sum(user_stats.values()),
+            'admin_users': user_stats.get('admin', 0),
+            'professor_users': user_stats.get('professor', 0),
+            'aluno_users': user_stats.get('aluno', 0),
+            'total_turmas': turmas_count,
+            'total_aulas': aulas_count,
+            'total_matriculas': matriculas_count,
+            'total_exercicios': exercicios_count
+        }
+        
+        return render_template('admin_dashboard.html', stats=stats)
+        
+    except Exception as e:
+        print(f"❌ Erro no dashboard admin: {e}")
+        # Retornar com estatísticas vazias em caso de erro
+        stats = {
+            'total_users': 0,
+            'admin_users': 0,
+            'professor_users': 0,
+            'aluno_users': 0,
+            'total_turmas': 0,
+            'total_aulas': 0,
+            'total_matriculas': 0,
+            'total_exercicios': 0
+        }
+        return render_template('admin_dashboard.html', stats=stats)
 
 @app.route('/admin/usuarios')
 @admin_required
@@ -314,19 +381,142 @@ def admin_editar_usuario(user_id):
 @professor_required
 def professor_dashboard():
     """Dashboard do professor"""
-    return render_template('professor_dashboard.html')
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Estatísticas do professor
+        professor_id = current_user.id
+        
+        # Contar aulas do professor
+        cur.execute('SELECT COUNT(*) FROM aulas WHERE professor_id = %s', (professor_id,))
+        total_aulas = cur.fetchone()['count']
+        
+        # Contar turmas do professor
+        cur.execute('SELECT COUNT(*) FROM turmas WHERE professor_id = %s', (professor_id,))
+        total_turmas = cur.fetchone()['count']
+        
+        # Contar alunos matriculados nas turmas do professor
+        cur.execute('''
+            SELECT COUNT(DISTINCT m.aluno_id) 
+            FROM matriculas m 
+            JOIN turmas t ON m.turma_id = t.id 
+            WHERE t.professor_id = %s
+        ''', (professor_id,))
+        total_alunos = cur.fetchone()['count']
+        
+        # Contar exercícios do professor
+        cur.execute('''
+            SELECT COUNT(*) 
+            FROM exercicios e 
+            JOIN aulas a ON e.aula_id = a.id 
+            WHERE a.professor_id = %s
+        ''', (professor_id,))
+        total_exercicios = cur.fetchone()['count']
+        
+        cur.close()
+        
+        # Buscar aulas do professor
+        cur.execute('''
+            SELECT id, titulo, disciplina, serie, created_at 
+            FROM aulas 
+            WHERE professor_id = %s 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        ''', (professor_id,))
+        aulas = cur.fetchall()
+        
+        # Buscar turmas do professor
+        cur.execute('''
+            SELECT id, nome, serie, created_at 
+            FROM turmas 
+            WHERE professor_id = %s 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        ''', (professor_id,))
+        turmas = cur.fetchall()
+        
+        cur.close()
+        
+        # Dados para o template
+        data = {
+            'total_aulas': total_aulas,
+            'total_turmas': total_turmas,
+            'total_alunos': total_alunos,
+            'total_exercicios': total_exercicios,
+            'aulas': aulas,
+            'turmas': turmas
+        }
+        
+        return render_template('professor_dashboard.html', data=data)
+        
+    except Exception as e:
+        print(f"❌ Erro no dashboard professor: {e}")
+        # Retornar com dados vazios em caso de erro
+        data = {
+            'total_aulas': 0,
+            'total_turmas': 0,
+            'total_alunos': 0,
+            'total_exercicios': 0,
+            'aulas': [],
+            'turmas': []
+        }
+        return render_template('professor_dashboard.html', data=data)
 
 @app.route('/professor/turmas')
 @professor_required
 def professor_turmas():
     """Turmas do professor"""
-    return render_template('professor_turmas.html')
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar turmas do professor
+        professor_id = current_user.id
+        cur.execute('''
+            SELECT t.id, t.nome, t.serie, t.created_at,
+                   COALESCE(COUNT(m.aluno_id), 0) as total_alunos
+            FROM turmas t
+            LEFT JOIN matriculas m ON t.id = m.turma_id
+            WHERE t.professor_id = %s 
+            GROUP BY t.id, t.nome, t.serie, t.created_at
+            ORDER BY t.created_at DESC
+        ''', (professor_id,))
+        turmas = cur.fetchall()
+        
+        cur.close()
+        
+        return render_template('professor_turmas.html', turmas=turmas)
+        
+    except Exception as e:
+        print(f"❌ Erro ao buscar turmas do professor: {e}")
+        return render_template('professor_turmas.html', turmas=[])
 
 @app.route('/professor/aulas')
 @professor_required
 def professor_aulas():
     """Aulas do professor"""
-    return render_template('professor_aulas.html')
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar aulas do professor
+        professor_id = current_user.id
+        cur.execute('''
+            SELECT id, titulo, disciplina, serie, created_at, descricao, duracao_minutos
+            FROM aulas 
+            WHERE professor_id = %s 
+            ORDER BY created_at DESC
+        ''', (professor_id,))
+        aulas = cur.fetchall()
+        
+        cur.close()
+        
+        return render_template('professor_aulas.html', aulas=aulas)
+        
+    except Exception as e:
+        print(f"❌ Erro ao buscar aulas do professor: {e}")
+        return render_template('professor_aulas.html', aulas=[])
 
 @app.route('/professor/relatorios')
 @professor_required
@@ -372,7 +562,62 @@ def professor_editar_aula(aula_id):
 @aluno_required
 def student_dashboard():
     """Dashboard do aluno"""
-    return render_template('student_dashboard.html')
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Estatísticas do aluno
+        aluno_id = current_user.id
+        
+        # Contar aulas iniciadas
+        cur.execute('''
+            SELECT COUNT(*) 
+            FROM progresso_alunos 
+            WHERE aluno_id = %s AND status IN ('iniciada', 'em_progresso')
+        ''', (aluno_id,))
+        aulas_iniciadas = cur.fetchone()['count']
+        
+        # Contar aulas concluídas
+        cur.execute('''
+            SELECT COUNT(*) 
+            FROM progresso_alunos 
+            WHERE aluno_id = %s AND status = 'concluida'
+        ''', (aluno_id,))
+        aulas_concluidas = cur.fetchone()['count']
+        
+        # Contar pontos ganhos
+        cur.execute('''
+            SELECT COALESCE(SUM(pontos_ganhos), 0) 
+            FROM respostas_alunos 
+            WHERE aluno_id = %s
+        ''', (aluno_id,))
+        pontos_ganhos = cur.fetchone()['coalesce']
+        
+        # Calcular nível atual (baseado nos pontos)
+        nivel_atual = max(1, pontos_ganhos // 100)  # 1 nível a cada 100 pontos
+        
+        cur.close()
+        
+        # Dados para o template
+        data = {
+            'aulas_iniciadas': aulas_iniciadas,
+            'aulas_concluidas': aulas_concluidas,
+            'pontos_ganhos': pontos_ganhos,
+            'nivel_atual': nivel_atual
+        }
+        
+        return render_template('student_dashboard.html', data=data)
+        
+    except Exception as e:
+        print(f"❌ Erro no dashboard aluno: {e}")
+        # Retornar com dados vazios em caso de erro
+        data = {
+            'aulas_iniciadas': 0,
+            'aulas_concluidas': 0,
+            'pontos_ganhos': 0,
+            'nivel_atual': 1
+        }
+        return render_template('student_dashboard.html', data=data)
 
 @app.route('/student/turmas')
 @aluno_required
@@ -402,7 +647,127 @@ def student_exercicio(exercicio_id):
 @aluno_required
 def student_progresso():
     """Progresso do aluno"""
-    return render_template('student_progresso.html')
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar dados de progresso do aluno
+        aluno_id = current_user.id
+        
+        # Total de aulas
+        cur.execute('''
+            SELECT COUNT(DISTINCT a.id) as total_aulas
+            FROM aulas a
+            JOIN matriculas m ON a.turma_id = m.turma_id
+            WHERE m.aluno_id = %s
+        ''', (aluno_id,))
+        total_aulas = cur.fetchone()['total_aulas'] if cur.fetchone() else 0
+        
+        # Aulas concluídas
+        cur.execute('''
+            SELECT COUNT(DISTINCT a.id) as aulas_concluidas
+            FROM aulas a
+            JOIN progresso_alunos pa ON a.id = pa.aula_id
+            WHERE pa.aluno_id = %s AND pa.status = 'concluida'
+        ''', (aluno_id,))
+        aulas_concluidas = cur.fetchone()['aulas_concluidas'] if cur.fetchone() else 0
+        
+        # Total de pontos
+        cur.execute('''
+            SELECT COALESCE(SUM(ra.pontos_ganhos), 0) as total_pontos
+            FROM respostas_alunos ra
+            WHERE ra.aluno_id = %s
+        ''', (aluno_id,))
+        total_pontos = cur.fetchone()['total_pontos'] if cur.fetchone() else 0
+        
+        # Tempo total de estudo (em minutos)
+        cur.execute('''
+            SELECT COALESCE(SUM(pa.tempo_gasto), 0) as tempo_total
+            FROM progresso_alunos pa
+            WHERE pa.aluno_id = %s
+        ''', (aluno_id,))
+        tempo_total = cur.fetchone()['tempo_total'] if cur.fetchone() else 0
+        
+        # Progresso por disciplina
+        cur.execute('''
+            SELECT 
+                a.disciplina,
+                COUNT(DISTINCT a.id) as total_aulas,
+                COUNT(DISTINCT CASE WHEN pa.status = 'concluida' THEN a.id END) as aulas_concluidas
+            FROM aulas a
+            JOIN matriculas m ON a.turma_id = m.turma_id
+            LEFT JOIN progresso_alunos pa ON a.id = pa.aula_id AND pa.aluno_id = %s
+            WHERE m.aluno_id = %s
+            GROUP BY a.disciplina
+        ''', (aluno_id, aluno_id))
+        progresso_disciplina = {}
+        for row in cur.fetchall():
+            progresso_disciplina[row['disciplina']] = {
+                'total': row['total_aulas'],
+                'concluidas': row['aulas_concluidas'],
+                'percentual': (row['aulas_concluidas'] / row['total_aulas'] * 100) if row['total_aulas'] > 0 else 0
+            }
+        
+        # Progresso por série
+        cur.execute('''
+            SELECT 
+                a.serie,
+                COUNT(DISTINCT a.id) as total_aulas,
+                COUNT(DISTINCT CASE WHEN pa.status = 'concluida' THEN a.id END) as aulas_concluidas
+            FROM aulas a
+            JOIN matriculas m ON a.turma_id = m.turma_id
+            LEFT JOIN progresso_alunos pa ON a.id = pa.aula_id AND pa.aluno_id = %s
+            WHERE m.aluno_id = %s
+            GROUP BY a.serie
+        ''', (aluno_id, aluno_id))
+        progresso_serie = {}
+        for row in cur.fetchall():
+            progresso_serie[row['serie']] = {
+                'total': row['total_aulas'],
+                'concluidas': row['aulas_concluidas'],
+                'percentual': (row['aulas_concluidas'] / row['total_aulas'] * 100) if row['total_aulas'] > 0 else 0
+            }
+        
+        # Aulas em progresso
+        cur.execute('''
+            SELECT 
+                a.id, a.titulo, a.disciplina, a.serie,
+                pa.status, pa.tempo_gasto, pa.ultimo_acesso
+            FROM aulas a
+            JOIN progresso_alunos pa ON a.id = pa.aula_id
+            WHERE pa.aluno_id = %s AND pa.status IN ('iniciada', 'em_progresso')
+            ORDER BY pa.ultimo_acesso DESC
+        ''', (aluno_id,))
+        aulas_progresso = cur.fetchall()
+        
+        cur.close()
+        
+        # Dados para o template
+        data = {
+            'total_aulas': total_aulas,
+            'aulas_concluidas': aulas_concluidas,
+            'total_pontos': total_pontos,
+            'tempo_total': tempo_total,
+            'progresso_disciplina': progresso_disciplina,
+            'progresso_serie': progresso_serie,
+            'aulas_progresso': aulas_progresso
+        }
+        
+        return render_template('student_progresso.html', data=data)
+        
+    except Exception as e:
+        print(f"❌ Erro ao buscar dados de progresso: {e}")
+        # Retornar com dados vazios em caso de erro
+        data = {
+            'total_aulas': 0,
+            'aulas_concluidas': 0,
+            'total_pontos': 0,
+            'tempo_total': 0,
+            'progresso_disciplina': {},
+            'progresso_serie': {},
+            'aulas_progresso': []
+        }
+        return render_template('student_progresso.html', data=data)
 
 @app.route('/student/metas')
 @aluno_required
@@ -426,7 +791,123 @@ def student_ranking():
 @aluno_required
 def student_gamificacao():
     """Gamificação do aluno"""
-    return render_template('student_gamificacao.html')
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar dados de gamificação do aluno
+        aluno_id = current_user.id
+        cur.execute('''
+            SELECT 
+                COALESCE(SUM(pontos), 0) as total_pontos,
+                COALESCE(COUNT(DISTINCT conquista_id), 0) as total_conquistas,
+                COALESCE(MAX(nivel), 1) as nivel_atual
+            FROM (
+                SELECT 
+                    COALESCE(SUM(ex.pontos), 0) as pontos,
+                    NULL as conquista_id,
+                    NULL as nivel
+                FROM exercicios ex
+                JOIN respostas_alunos ra ON ex.id = ra.exercicio_id
+                WHERE ra.aluno_id = %s
+                
+                UNION ALL
+                
+                SELECT 
+                    0 as pontos,
+                    c.id as conquista_id,
+                    c.nivel_requerido as nivel
+                FROM conquistas c
+                JOIN conquistas_alunos ca ON c.id = ca.conquista_id
+                WHERE ca.aluno_id = %s
+            ) gamificacao
+        ''', (aluno_id, aluno_id))
+        
+        result = cur.fetchone()
+        total_pontos = result[0] if result else 0
+        total_conquistas = result[1] if result else 0
+        nivel_atual = result[2] if result else 1
+        
+        cur.close()
+        
+        # Buscar informações adicionais
+        # Aulas concluídas
+        cur.execute('''
+            SELECT COUNT(DISTINCT a.id) as aulas_concluidas
+            FROM aulas a
+            JOIN progresso_alunos pa ON a.id = pa.aula_id
+            WHERE pa.aluno_id = %s AND pa.status = 'concluida'
+        ''', (aluno_id,))
+        aulas_concluidas = cur.fetchone()[0] if cur.fetchone() else 0
+        
+        # Conquistas
+        cur.execute('''
+            SELECT COUNT(*) as conquistas_count
+            FROM conquistas_alunos
+            WHERE aluno_id = %s
+        ''', (aluno_id,))
+        conquistas_count = cur.fetchone()[0] if cur.fetchone() else 0
+        
+        # Ranking
+        cur.execute('''
+            SELECT 
+                COUNT(*) as total_alunos,
+                (SELECT COUNT(*) + 1 
+                 FROM (
+                     SELECT COALESCE(SUM(pontos), 0) as total_pontos
+                     FROM exercicios ex
+                     JOIN respostas_alunos ra ON ex.id = ra.exercicio_id
+                     GROUP BY ra.aluno_id
+                 ) ranking
+                 WHERE total_pontos > %s
+                ) as posicao_ranking
+            FROM users
+            WHERE user_type = 'aluno'
+        ''', (total_pontos,))
+        ranking_result = cur.fetchone()
+        total_alunos = ranking_result[0] if ranking_result else 0
+        posicao_ranking = ranking_result[1] if ranking_result else 1
+        
+        # Informações do nível
+        nivel_info = {
+            1: {'nome': 'Iniciante', 'cor': '#28a745', 'min_pontos': 0, 'max_pontos': 100},
+            2: {'nome': 'Aprendiz', 'cor': '#17a2b8', 'min_pontos': 101, 'max_pontos': 300},
+            3: {'nome': 'Intermediário', 'cor': '#ffc107', 'min_pontos': 301, 'max_pontos': 600},
+            4: {'nome': 'Avançado', 'cor': '#fd7e14', 'min_pontos': 601, 'max_pontos': 1000},
+            5: {'nome': 'Mestre', 'cor': '#dc3545', 'min_pontos': 1001, 'max_pontos': 9999}
+        }
+        
+        # Calcular progresso do nível atual
+        nivel_atual_info = nivel_info.get(nivel_atual, nivel_info[1])
+        pontos_nivel_atual = total_pontos - nivel_atual_info['min_pontos']
+        pontos_necessarios = nivel_atual_info['max_pontos'] - nivel_atual_info['min_pontos']
+        progresso_nivel = min(100, max(0, (pontos_nivel_atual / pontos_necessarios) * 100)) if pontos_necessarios > 0 else 100
+        
+        cur.close()
+        
+        return render_template('student_gamificacao.html', 
+                             total_pontos=total_pontos,
+                             total_conquistas=total_conquistas,
+                             nivel_atual=nivel_atual,
+                             aulas_concluidas=aulas_concluidas,
+                             conquistas_count=conquistas_count,
+                             posicao_ranking=posicao_ranking,
+                             total_alunos=total_alunos,
+                             nivel_info=nivel_info,
+                             progresso_nivel=progresso_nivel)
+        
+    except Exception as e:
+        print(f"❌ Erro ao buscar dados de gamificação: {e}")
+        return render_template('student_gamificacao.html',
+                             total_pontos=0,
+                             total_conquistas=0,
+                             nivel_atual=1,
+                             aulas_concluidas=0,
+                             conquistas_count=0,
+                             posicao_ranking=1,
+                             total_alunos=0,
+                             nivel_info={1: {'nome': 'Iniciante', 'cor': '#28a745', 'min_pontos': 0, 'max_pontos': 100}},
+                             progresso_nivel=0)
 
 # =====================================================
 # ROTAS PROTEGIDAS - PERFIL
@@ -492,4 +973,4 @@ def lesson(lesson_id):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=True)

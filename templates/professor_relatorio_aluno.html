@@ -25,7 +25,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                        <a class="nav-link" href="{{ url_for('professor_criar_aula') }}">
                             <i class="fas fa-plus me-2"></i>Criar Aula
                         </a>
                     </li>
@@ -277,7 +277,7 @@
     {% set pontuacao_disciplina = pontuacao_disciplina + (aula[5] or 0) %}
     {% endif %}
     {% endfor %}
-    {{ pontuacao_disciplina }},
+    { { pontuacao_disciplina } },
     {% endfor %}
             ],
     backgroundColor: 'rgba(54, 162, 235, 0.8)',

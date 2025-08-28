@@ -25,7 +25,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                        <a class="nav-link" href="{{ url_for('professor_criar_aula') }}">
                             <i class="fas fa-plus me-2"></i>Criar Aula
                         </a>
                     </li>
@@ -47,10 +47,10 @@
                 </h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
-                        <a href="{{ url_for('criar_aula') }}" class="btn btn-sm btn-outline-primary">
+                        <a href="{{ url_for('professor_criar_aula') }}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-plus me-1"></i>Nova Aula
                         </a>
-                        <a href="{{ url_for('criar_turma') }}" class="btn btn-sm btn-outline-success">
+                        <a href="{{ url_for('professor_criar_turma') }}" class="btn btn-sm btn-outline-success">
                             <i class="fas fa-users me-1"></i>Nova Turma
                         </a>
                     </div>
@@ -123,9 +123,9 @@
                                     </div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">
                                         {% if data.total_turmas > 0 %}
-                                            {{ (data.total_aulas / data.total_turmas) | round(1) }}
+                                        {{ (data.total_aulas / data.total_turmas) | round(1) }}
                                         {% else %}
-                                            0
+                                        0
                                         {% endif %}
                                     </div>
                                 </div>
@@ -168,19 +168,23 @@
                                                 <span class="badge bg-primary">{{ aula.disciplina }}</span>
                                             </td>
                                             <td>{{ aula.serie }}</td>
-                                            <td>{{ format_datetime(aula.created_at) }}</td>
+                                            <td>{{ aula.created_at.strftime('%d/%m/%Y %H:%M') if aula.created_at else
+                                                'N/A' }}</td>
                                             <td>
-                                                <a href="{{ url_for('professor_exercicios', aula_id=aula.id) }}" class="btn btn-sm btn-primary" title="Ver Exercícios">
+                                                <!-- Funcionalidade de exercícios será implementada posteriormente -->
+                                                <button class="btn btn-sm btn-primary"
+                                                    title="Ver Exercícios (em desenvolvimento)" disabled>
                                                     <i class="fas fa-list"></i>
-                                                </a>
-                                                <a href="{{ url_for('editar_aula', aula_id=aula.id) }}" class="btn btn-sm btn-warning" title="Editar Aula">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form method="POST" action="{{ url_for('excluir_aula', aula_id=aula.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta aula?')">
-                                                    <button type="submit" class="btn btn-sm btn-danger" title="Excluir Aula">
+                                                    </a>
+                                                    <a href="{{ url_for('professor_editar_aula', aula_id=aula.id) }}"
+                                                        class="btn btn-sm btn-warning" title="Editar Aula">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <!-- Funcionalidade de exclusão será implementada posteriormente -->
+                                                    <button class="btn btn-sm btn-danger"
+                                                        title="Excluir Aula (em desenvolvimento)" disabled>
                                                         <i class="fas fa-trash"></i>
                                                     </button>
-                                                </form>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -229,7 +233,8 @@
                                         <tr>
                                             <td>{{ turma.nome }}</td>
                                             <td>{{ turma.serie }}</td>
-                                            <td>{{ format_datetime(turma.created_at) }}</td>
+                                            <td>{{ turma.created_at.strftime('%d/%m/%Y %H:%M') if turma.created_at else
+                                                'N/A' }}</td>
                                             <td>
                                                 <span class="badge bg-info">12 alunos</span>
                                             </td>

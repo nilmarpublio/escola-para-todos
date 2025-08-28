@@ -62,7 +62,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h4 class="card-title">{{ stats[0] }}</h4>
+                                    <h4 class="card-title">{{ stats.total_users }}</h4>
                                     <p class="card-text">Total de Usuários</p>
                                 </div>
                                 <div class="align-self-center">
@@ -77,7 +77,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h4 class="card-title">{{ stats[1] }}</h4>
+                                    <h4 class="card-title">{{ stats.aluno_users }}</h4>
                                     <p class="card-text">Alunos</p>
                                 </div>
                                 <div class="align-self-center">
@@ -92,7 +92,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h4 class="card-title">{{ stats[2] }}</h4>
+                                    <h4 class="card-title">{{ stats.professor_users }}</h4>
                                     <p class="card-text">Professores</p>
                                 </div>
                                 <div class="align-self-center">
@@ -107,7 +107,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h4 class="card-title">{{ stats[3] }}</h4>
+                                    <h4 class="card-title">{{ stats.admin_users }}</h4>
                                     <p class="card-text">Administradores</p>
                                 </div>
                                 <div class="align-self-center">
@@ -126,8 +126,8 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h4 class="card-title">{{ total_turmas }}</h4>
-                                    <p class="card-text">Total de Turmas</p>
+                                    <h4 class="card-title">{{ stats.total_turmas }}
+                                        <p class="card-text">Total de Turmas</p>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-chalkboard fa-2x"></i>
@@ -141,8 +141,8 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h4 class="card-title">{{ total_aulas }}</h4>
-                                    <p class="card-text">Total de Aulas</p>
+                                    <h4 class="card-title">{{ stats.total_aulas }}
+                                        <p class="card-text">Total de Aulas</p>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-book fa-2x"></i>
@@ -156,8 +156,8 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h4 class="card-title">{{ total_exercicios }}</h4>
-                                    <p class="card-text">Total de Exercícios</p>
+                                    <h4 class="card-title">{{ stats.total_exercicios }}
+                                        <p class="card-text">Total de Exercícios</p>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-question-circle fa-2x"></i>

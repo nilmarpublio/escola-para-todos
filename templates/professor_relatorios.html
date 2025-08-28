@@ -25,7 +25,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                        <a class="nav-link" href="{{ url_for('professor_criar_aula') }}">
                             <i class="fas fa-plus me-2"></i>Criar Aula
                         </a>
                     </li>
@@ -40,7 +40,8 @@
 
         <!-- Main content -->
         <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">
                     <i class="fas fa-chart-bar me-2"></i>Relatórios e Analytics
                 </h1>
@@ -142,7 +143,8 @@
                                         <div class="card-body text-center">
                                             <i class="fas fa-users fa-3x text-primary mb-3"></i>
                                             <h5 class="card-title text-primary">Relatórios por Turma</h5>
-                                            <p class="card-text">Visualize o desempenho geral de cada turma, incluindo estatísticas de progresso e participação dos alunos.</p>
+                                            <p class="card-text">Visualize o desempenho geral de cada turma, incluindo
+                                                estatísticas de progresso e participação dos alunos.</p>
                                             <a href="#relatorios-turma" class="btn btn-primary">
                                                 <i class="fas fa-chart-bar me-2"></i>Ver Relatórios
                                             </a>
@@ -155,7 +157,8 @@
                                         <div class="card-body text-center">
                                             <i class="fas fa-user-graduate fa-3x text-success mb-3"></i>
                                             <h5 class="card-title text-success">Relatórios por Aluno</h5>
-                                            <p class="card-text">Acompanhe o progresso individual de cada aluno, com detalhes sobre aulas concluídas e pontuação.</p>
+                                            <p class="card-text">Acompanhe o progresso individual de cada aluno, com
+                                                detalhes sobre aulas concluídas e pontuação.</p>
                                             <a href="#relatorios-aluno" class="btn btn-success">
                                                 <i class="fas fa-user-chart me-2"></i>Ver Relatórios
                                             </a>
@@ -168,7 +171,8 @@
                                         <div class="card-body text-center">
                                             <i class="fas fa-chalkboard-teacher fa-3x text-info mb-3"></i>
                                             <h5 class="card-title text-info">Relatórios por Aula</h5>
-                                            <p class="card-text">Analise o desempenho dos alunos em aulas específicas e identifique pontos de melhoria.</p>
+                                            <p class="card-text">Analise o desempenho dos alunos em aulas específicas e
+                                                identifique pontos de melhoria.</p>
                                             <a href="#relatorios-aula" class="btn btn-info">
                                                 <i class="fas fa-chart-pie me-2"></i>Ver Relatórios
                                             </a>
@@ -193,9 +197,11 @@
                         <div class="card-body">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
-                                <strong>Como usar:</strong> Clique em "Ver Relatório" para acessar estatísticas detalhadas de cada turma, incluindo progresso dos alunos, aulas concluídas e pontuação média.
+                                <strong>Como usar:</strong> Clique em "Ver Relatório" para acessar estatísticas
+                                detalhadas de cada turma, incluindo progresso dos alunos, aulas concluídas e pontuação
+                                média.
                             </div>
-                            
+
                             <div class="row" id="turmas-container">
                                 <div class="col-12 text-center py-4">
                                     <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
@@ -219,9 +225,10 @@
                         <div class="card-body">
                             <div class="alert alert-success">
                                 <i class="fas fa-info-circle me-2"></i>
-                                <strong>Como usar:</strong> Selecione uma turma para visualizar relatórios individuais de cada aluno, incluindo progresso detalhado e histórico de atividades.
+                                <strong>Como usar:</strong> Selecione uma turma para visualizar relatórios individuais
+                                de cada aluno, incluindo progresso detalhado e histórico de atividades.
                             </div>
-                            
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <label for="turma-select" class="form-label">Selecione uma Turma:</label>
@@ -230,12 +237,13 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6 d-flex align-items-end">
-                                    <button type="button" class="btn btn-success" onclick="carregarAlunosTurma()" disabled id="btn-carregar-alunos">
+                                    <button type="button" class="btn btn-success" onclick="carregarAlunosTurma()"
+                                        disabled id="btn-carregar-alunos">
                                         <i class="fas fa-search me-2"></i>Carregar Alunos
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div class="row mt-3" id="alunos-container">
                                 <!-- Alunos serão carregados aqui -->
                             </div>
@@ -256,9 +264,10 @@
                         <div class="card-body">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
-                                <strong>Como usar:</strong> Visualize estatísticas de desempenho para cada aula, incluindo taxa de conclusão e pontuação média dos alunos.
+                                <strong>Como usar:</strong> Visualize estatísticas de desempenho para cada aula,
+                                incluindo taxa de conclusão e pontuação média dos alunos.
                             </div>
-                            
+
                             <div class="row" id="aulas-container">
                                 <div class="col-12 text-center py-4">
                                     <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
@@ -343,28 +352,28 @@
 </style>
 
 <script>
-// Função para exportar relatório
-function exportarRelatorio() {
-    alert('Funcionalidade de exportação será implementada em breve!');
-}
+    // Função para exportar relatório
+    function exportarRelatorio() {
+        alert('Funcionalidade de exportação será implementada em breve!');
+    }
 
-// Função para carregar estatísticas básicas
-function carregarEstatisticas() {
-    // Simular carregamento de dados
-    setTimeout(() => {
-        document.getElementById('total-aulas').textContent = '12';
-        document.getElementById('total-turmas').textContent = '3';
-        document.getElementById('total-alunos').textContent = '45';
-        document.getElementById('media-progresso').textContent = '78%';
-    }, 1000);
-}
+    // Função para carregar estatísticas básicas
+    function carregarEstatisticas() {
+        // Simular carregamento de dados
+        setTimeout(() => {
+            document.getElementById('total-aulas').textContent = '12';
+            document.getElementById('total-turmas').textContent = '3';
+            document.getElementById('total-alunos').textContent = '45';
+            document.getElementById('media-progresso').textContent = '78%';
+        }, 1000);
+    }
 
-// Função para carregar turmas
-function carregarTurmas() {
-    // Simular carregamento de turmas
-    setTimeout(() => {
-        const container = document.getElementById('turmas-container');
-        container.innerHTML = `
+    // Função para carregar turmas
+    function carregarTurmas() {
+        // Simular carregamento de turmas
+        setTimeout(() => {
+            const container = document.getElementById('turmas-container');
+            container.innerHTML = `
             <div class="col-md-6 mb-3">
                 <div class="card border-primary">
                     <div class="card-body">
@@ -390,15 +399,15 @@ function carregarTurmas() {
                 </div>
             </div>
         `;
-    }, 1500);
-}
+        }, 1500);
+    }
 
-// Função para carregar aulas
-function carregarAulas() {
-    // Simular carregamento de aulas
-    setTimeout(() => {
-        const container = document.getElementById('aulas-container');
-        container.innerHTML = `
+    // Função para carregar aulas
+    function carregarAulas() {
+        // Simular carregamento de aulas
+        setTimeout(() => {
+            const container = document.getElementById('aulas-container');
+            container.innerHTML = `
             <div class="col-md-6 mb-3">
                 <div class="card border-info">
                     <div class="card-body">
@@ -424,22 +433,22 @@ function carregarAulas() {
                 </div>
             </div>
         `;
-    }, 2000);
-}
-
-// Função para carregar alunos de uma turma
-function carregarAlunosTurma() {
-    const turmaSelect = document.getElementById('turma-select');
-    const turmaId = turmaSelect.value;
-    
-    if (!turmaId) {
-        alert('Por favor, selecione uma turma.');
-        return;
+        }, 2000);
     }
-    
-    // Simular carregamento de alunos
-    const container = document.getElementById('alunos-container');
-    container.innerHTML = `
+
+    // Função para carregar alunos de uma turma
+    function carregarAlunosTurma() {
+        const turmaSelect = document.getElementById('turma-select');
+        const turmaId = turmaSelect.value;
+
+        if (!turmaId) {
+            alert('Por favor, selecione uma turma.');
+            return;
+        }
+
+        // Simular carregamento de alunos
+        const container = document.getElementById('alunos-container');
+        container.innerHTML = `
         <div class="col-12">
             <div class="alert alert-info">
                 <i class="fas fa-spinner fa-spin me-2"></i>
@@ -447,9 +456,9 @@ function carregarAlunosTurma() {
             </div>
         </div>
     `;
-    
-    setTimeout(() => {
-        container.innerHTML = `
+
+        setTimeout(() => {
+            container.innerHTML = `
             <div class="col-md-6 mb-3">
                 <div class="card">
                     <div class="card-body">
@@ -469,20 +478,20 @@ function carregarAlunosTurma() {
                 </div>
             </div>
         `;
-    }, 1500);
-}
+        }, 1500);
+    }
 
-// Habilitar botão quando turma for selecionada
-document.getElementById('turma-select').addEventListener('change', function() {
-    const btnCarregar = document.getElementById('btn-carregar-alunos');
-    btnCarregar.disabled = !this.value;
-});
+    // Habilitar botão quando turma for selecionada
+    document.getElementById('turma-select').addEventListener('change', function () {
+        const btnCarregar = document.getElementById('btn-carregar-alunos');
+        btnCarregar.disabled = !this.value;
+    });
 
-// Carregar dados quando a página carregar
-document.addEventListener('DOMContentLoaded', function() {
-    carregarEstatisticas();
-    carregarTurmas();
-    carregarAulas();
-});
+    // Carregar dados quando a página carregar
+    document.addEventListener('DOMContentLoaded', function () {
+        carregarEstatisticas();
+        carregarTurmas();
+        carregarAulas();
+    });
 </script>
 {% endblock %}

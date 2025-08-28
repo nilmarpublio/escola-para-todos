@@ -25,7 +25,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                        <a class="nav-link" href="{{ url_for('professor_criar_aula') }}">
                             <i class="fas fa-plus me-2"></i>Criar Aula
                         </a>
                     </li>
@@ -40,7 +40,8 @@
 
         <!-- Main content -->
         <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">
                     <i class="fas fa-plus me-2"></i>Criar Nova Turma
                 </h1>
@@ -68,8 +69,8 @@
                                             <label for="nome" class="form-label">
                                                 <strong>Nome da Turma *</strong>
                                             </label>
-                                            <input type="text" class="form-control" id="nome" name="nome" 
-                                                   placeholder="Ex: 7º Ano A - Matemática" required>
+                                            <input type="text" class="form-control" id="nome" name="nome"
+                                                placeholder="Ex: 7º Ano A - Matemática" required>
                                             <div class="form-text">Nome descritivo para identificar a turma</div>
                                         </div>
                                     </div>
@@ -93,8 +94,8 @@
                                     <label for="descricao" class="form-label">
                                         <strong>Descrição da Turma</strong>
                                     </label>
-                                    <textarea class="form-control" id="descricao" name="descricao" rows="3" 
-                                              placeholder="Descreva o foco da turma, objetivos específicos ou características especiais..."></textarea>
+                                    <textarea class="form-control" id="descricao" name="descricao" rows="3"
+                                        placeholder="Descreva o foco da turma, objetivos específicos ou características especiais..."></textarea>
                                     <div class="form-text">Informações adicionais sobre a turma</div>
                                 </div>
 
@@ -104,8 +105,8 @@
                                             <label for="capacidade_maxima" class="form-label">
                                                 <strong>Capacidade Máxima</strong>
                                             </label>
-                                            <input type="number" class="form-control" id="capacidade_maxima" 
-                                                   name="capacidade_maxima" min="5" max="50" placeholder="30">
+                                            <input type="number" class="form-control" id="capacidade_maxima"
+                                                name="capacidade_maxima" min="5" max="50" placeholder="30">
                                             <div class="form-text">Número máximo de alunos na turma</div>
                                         </div>
                                     </div>
@@ -131,8 +132,8 @@
                                             <label for="sala" class="form-label">
                                                 <strong>Sala</strong>
                                             </label>
-                                            <input type="text" class="form-control" id="sala" name="sala" 
-                                                   placeholder="Ex: Sala 101 ou Laboratório de Informática">
+                                            <input type="text" class="form-control" id="sala" name="sala"
+                                                placeholder="Ex: Sala 101 ou Laboratório de Informática">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -140,9 +141,8 @@
                                             <label for="ano_letivo" class="form-label">
                                                 <strong>Ano Letivo</strong>
                                             </label>
-                                            <input type="number" class="form-control" id="ano_letivo" 
-                                                   name="ano_letivo" min="2020" max="2030" 
-                                                   value="{{ now.year if now else 2024 }}">
+                                            <input type="number" class="form-control" id="ano_letivo" name="ano_letivo"
+                                                min="2020" max="2030" value="{{ now.year if now else 2024 }}">
                                         </div>
                                     </div>
                                 </div>
@@ -179,15 +179,19 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <h6><i class="fas fa-users text-primary me-2"></i>Nomes Descritivos</h6>
-                                    <p class="small text-muted">Use nomes que facilitem a identificação da turma e seu conteúdo.</p>
+                                    <p class="small text-muted">Use nomes que facilitem a identificação da turma e seu
+                                        conteúdo.</p>
                                 </div>
                                 <div class="col-md-4">
                                     <h6><i class="fas fa-clock text-success me-2"></i>Organização por Período</h6>
-                                    <p class="small text-muted">Organize turmas por período para facilitar o planejamento.</p>
+                                    <p class="small text-muted">Organize turmas por período para facilitar o
+                                        planejamento.</p>
                                 </div>
                                 <div class="col-md-4">
-                                    <h6><i class="fas fa-chalkboard-teacher text-warning me-2"></i>Capacidade Adequada</h6>
-                                    <p class="small text-muted">Defina uma capacidade máxima que permita atenção individual.</p>
+                                    <h6><i class="fas fa-chalkboard-teacher text-warning me-2"></i>Capacidade Adequada
+                                    </h6>
+                                    <p class="small text-muted">Defina uma capacidade máxima que permita atenção
+                                        individual.</p>
                                 </div>
                             </div>
                         </div>
@@ -225,7 +229,8 @@
                                             <ul class="list-unstyled">
                                                 <li><strong>Período:</strong> <span id="preview-periodo">-</span></li>
                                                 <li><strong>Sala:</strong> <span id="preview-sala">-</span></li>
-                                                <li><strong>Capacidade:</strong> <span id="preview-capacidade">-</span></li>
+                                                <li><strong>Capacidade:</strong> <span id="preview-capacidade">-</span>
+                                                </li>
                                                 <li><strong>Ano Letivo:</strong> <span id="preview-ano">-</span></li>
                                             </ul>
                                         </div>
@@ -274,7 +279,8 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .form-control:focus, .form-select:focus {
+    .form-control:focus,
+    .form-select:focus {
         border-color: #007bff;
         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
@@ -285,62 +291,62 @@
 </style>
 
 <script>
-function salvarRascunho() {
-    // Implementar funcionalidade de rascunho
-    alert('Funcionalidade de rascunho será implementada em breve!');
-}
-
-// Atualizar pré-visualização em tempo real
-function atualizarPreview() {
-    const nome = document.getElementById('nome').value || 'Nome da Turma';
-    const serie = document.getElementById('serie').value || 'Série';
-    const descricao = document.getElementById('descricao').value || 'Descrição da turma';
-    const periodo = document.getElementById('periodo').value || '-';
-    const sala = document.getElementById('sala').value || '-';
-    const capacidade = document.getElementById('capacidade_maxima').value || '-';
-    const ano = document.getElementById('ano_letivo').value || '-';
-
-    document.getElementById('preview-nome').textContent = nome;
-    document.getElementById('preview-serie').textContent = serie;
-    document.getElementById('preview-descricao').textContent = descricao;
-    document.getElementById('preview-periodo').textContent = periodo;
-    document.getElementById('preview-sala').textContent = sala;
-    document.getElementById('preview-capacidade').textContent = capacidade;
-    document.getElementById('preview-ano').textContent = ano;
-}
-
-// Adicionar event listeners para atualizar preview
-document.getElementById('nome').addEventListener('input', atualizarPreview);
-document.getElementById('serie').addEventListener('change', atualizarPreview);
-document.getElementById('descricao').addEventListener('input', atualizarPreview);
-document.getElementById('periodo').addEventListener('change', atualizarPreview);
-document.getElementById('sala').addEventListener('input', atualizarPreview);
-document.getElementById('capacidade_maxima').addEventListener('input', atualizarPreview);
-document.getElementById('ano_letivo').addEventListener('input', atualizarPreview);
-
-// Validação do formulário
-document.getElementById('form-turma').addEventListener('submit', function(e) {
-    const nome = document.getElementById('nome').value.trim();
-    const serie = document.getElementById('serie').value;
-    
-    if (!nome || !serie) {
-        e.preventDefault();
-        alert('Por favor, preencha todos os campos obrigatórios.');
-        return false;
+    function salvarRascunho() {
+        // Implementar funcionalidade de rascunho
+        alert('Funcionalidade de rascunho será implementada em breve!');
     }
-    
-    if (nome.length < 5) {
-        e.preventDefault();
-        alert('O nome da turma deve ter pelo menos 5 caracteres.');
-        return false;
-    }
-    
-    return true;
-});
 
-// Inicializar preview
-document.addEventListener('DOMContentLoaded', function() {
-    atualizarPreview();
-});
+    // Atualizar pré-visualização em tempo real
+    function atualizarPreview() {
+        const nome = document.getElementById('nome').value || 'Nome da Turma';
+        const serie = document.getElementById('serie').value || 'Série';
+        const descricao = document.getElementById('descricao').value || 'Descrição da turma';
+        const periodo = document.getElementById('periodo').value || '-';
+        const sala = document.getElementById('sala').value || '-';
+        const capacidade = document.getElementById('capacidade_maxima').value || '-';
+        const ano = document.getElementById('ano_letivo').value || '-';
+
+        document.getElementById('preview-nome').textContent = nome;
+        document.getElementById('preview-serie').textContent = serie;
+        document.getElementById('preview-descricao').textContent = descricao;
+        document.getElementById('preview-periodo').textContent = periodo;
+        document.getElementById('preview-sala').textContent = sala;
+        document.getElementById('preview-capacidade').textContent = capacidade;
+        document.getElementById('preview-ano').textContent = ano;
+    }
+
+    // Adicionar event listeners para atualizar preview
+    document.getElementById('nome').addEventListener('input', atualizarPreview);
+    document.getElementById('serie').addEventListener('change', atualizarPreview);
+    document.getElementById('descricao').addEventListener('input', atualizarPreview);
+    document.getElementById('periodo').addEventListener('change', atualizarPreview);
+    document.getElementById('sala').addEventListener('input', atualizarPreview);
+    document.getElementById('capacidade_maxima').addEventListener('input', atualizarPreview);
+    document.getElementById('ano_letivo').addEventListener('input', atualizarPreview);
+
+    // Validação do formulário
+    document.getElementById('form-turma').addEventListener('submit', function (e) {
+        const nome = document.getElementById('nome').value.trim();
+        const serie = document.getElementById('serie').value;
+
+        if (!nome || !serie) {
+            e.preventDefault();
+            alert('Por favor, preencha todos os campos obrigatórios.');
+            return false;
+        }
+
+        if (nome.length < 5) {
+            e.preventDefault();
+            alert('O nome da turma deve ter pelo menos 5 caracteres.');
+            return false;
+        }
+
+        return true;
+    });
+
+    // Inicializar preview
+    document.addEventListener('DOMContentLoaded', function () {
+        atualizarPreview();
+    });
 </script>
 {% endblock %}

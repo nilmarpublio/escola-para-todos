@@ -25,7 +25,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('criar_aula') }}">
+                        <a class="nav-link" href="{{ url_for('professor_criar_aula') }}">
                             <i class="fas fa-plus me-2"></i>Criar Aula
                         </a>
                     </li>
@@ -40,12 +40,13 @@
 
         <!-- Main content -->
         <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">
                     <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
                 </h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <a href="{{ url_for('criar_aula') }}" class="btn btn-primary">
+                    <a href="{{ url_for('professor_criar_aula') }}" class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>Nova Aula
                     </a>
                 </div>
@@ -122,11 +123,13 @@
                                     </thead>
                                     <tbody>
                                         {% for aula in aulas %}
-                                        <tr class="aula-row" data-disciplina="{{ aula.disciplina }}" data-serie="{{ aula.serie }}">
+                                        <tr class="aula-row" data-disciplina="{{ aula.disciplina }}"
+                                            data-serie="{{ aula.serie }}">
                                             <td>
                                                 <strong>{{ aula.titulo }}</strong>
                                                 {% if aula.descricao %}
-                                                <br><small class="text-muted">{{ aula.descricao[:100] }}{% if aula.descricao|length > 100 %}...{% endif %}</small>
+                                                <br><small class="text-muted">{{ aula.descricao[:100] }}{% if
+                                                    aula.descricao|length > 100 %}...{% endif %}</small>
                                                 {% endif %}
                                             </td>
                                             <td>
@@ -137,25 +140,29 @@
                                             </td>
                                             <td>
                                                 {% if aula.duracao_minutos %}
-                                                    {{ aula.duracao_minutos }} min
+                                                {{ aula.duracao_minutos }} min
                                                 {% else %}
-                                                    <span class="text-muted">-</span>
+                                                <span class="text-muted">-</span>
                                                 {% endif %}
                                             </td>
-                                            <td>{{ format_datetime(aula.created_at) }}</td>
+                                            <td>{{ aula.created_at.strftime('%d/%m/%Y %H:%M') if aula.created_at else
+                                                'N/A' }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a href="{{ url_for('professor_exercicios', aula_id=aula.id) }}" class="btn btn-sm btn-primary" title="Ver Exercícios">
+                                                    <!-- Funcionalidade de exercícios será implementada posteriormente -->
+                                                    <button class="btn btn-sm btn-primary"
+                                                        title="Ver Exercícios (em desenvolvimento)" disabled>
                                                         <i class="fas fa-list"></i>
-                                                    </a>
-                                                    <a href="{{ url_for('editar_aula', aula_id=aula.id) }}" class="btn btn-sm btn-warning" title="Editar Aula">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <form method="POST" action="{{ url_for('excluir_aula', aula_id=aula.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta aula?')">
-                                                        <button type="submit" class="btn btn-sm btn-danger" title="Excluir Aula">
+                                                        </a>
+                                                        <a href="{{ url_for('professor_editar_aula', aula_id=aula.id) }}"
+                                                            class="btn btn-sm btn-warning" title="Editar Aula">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <!-- Funcionalidade de exclusão será implementada posteriormente -->
+                                                        <button class="btn btn-sm btn-danger"
+                                                            title="Excluir Aula (em desenvolvimento)" disabled>
                                                             <i class="fas fa-trash"></i>
                                                         </button>
-                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>
@@ -168,7 +175,7 @@
                                 <i class="fas fa-chalkboard-teacher fa-4x text-muted mb-3"></i>
                                 <h5 class="text-muted">Nenhuma aula criada ainda</h5>
                                 <p class="text-muted">Comece criando sua primeira aula!</p>
-                                <a href="{{ url_for('criar_aula') }}" class="btn btn-primary">
+                                <a href="{{ url_for('professor_criar_aula') }}" class="btn btn-primary">
                                     <i class="fas fa-plus me-2"></i>Criar Primeira Aula
                                 </a>
                             </div>
@@ -225,42 +232,42 @@
 </style>
 
 <script>
-function limparFiltros() {
-    document.getElementById('disciplina-filter').value = '';
-    document.getElementById('serie-filter').value = '';
-    document.getElementById('status-filter').value = '';
-    aplicarFiltros();
-}
+    function limparFiltros() {
+        document.getElementById('disciplina-filter').value = '';
+        document.getElementById('serie-filter').value = '';
+        document.getElementById('status-filter').value = '';
+        aplicarFiltros();
+    }
 
-function aplicarFiltros() {
-    const disciplina = document.getElementById('disciplina-filter').value;
-    const serie = document.getElementById('serie-filter').value;
-    const status = document.getElementById('status-filter').value;
-    
-    const aulas = document.querySelectorAll('.aula-row');
-    
-    aulas.forEach(aula => {
-        let mostrar = true;
-        
-        if (disciplina && aula.dataset.disciplina !== disciplina) {
-            mostrar = false;
-        }
-        
-        if (serie && aula.dataset.serie !== serie) {
-            mostrar = false;
-        }
-        
-        if (mostrar) {
-            aula.style.display = '';
-        } else {
-            aula.style.display = 'none';
-        }
-    });
-}
+    function aplicarFiltros() {
+        const disciplina = document.getElementById('disciplina-filter').value;
+        const serie = document.getElementById('serie-filter').value;
+        const status = document.getElementById('status-filter').value;
 
-// Aplicar filtros quando mudar os valores
-document.getElementById('disciplina-filter').addEventListener('change', aplicarFiltros);
-document.getElementById('serie-filter').addEventListener('change', aplicarFiltros);
-document.getElementById('status-filter').addEventListener('change', aplicarFiltros);
+        const aulas = document.querySelectorAll('.aula-row');
+
+        aulas.forEach(aula => {
+            let mostrar = true;
+
+            if (disciplina && aula.dataset.disciplina !== disciplina) {
+                mostrar = false;
+            }
+
+            if (serie && aula.dataset.serie !== serie) {
+                mostrar = false;
+            }
+
+            if (mostrar) {
+                aula.style.display = '';
+            } else {
+                aula.style.display = 'none';
+            }
+        });
+    }
+
+    // Aplicar filtros quando mudar os valores
+    document.getElementById('disciplina-filter').addEventListener('change', aplicarFiltros);
+    document.getElementById('serie-filter').addEventListener('change', aplicarFiltros);
+    document.getElementById('status-filter').addEventListener('change', aplicarFiltros);
 </script>
 {% endblock %}
