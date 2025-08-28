@@ -119,7 +119,7 @@ class User(UserMixin):
         cur = db.cursor()
         cur.execute('''
             SELECT id, username, email, first_name, last_name, user_type, is_active, created_at, updated_at
-            FROM users WHERE id = %s
+            FROM users WHERE username = %s
         ''', (username,))
         user_data = cur.fetchone()
         cur.close()
