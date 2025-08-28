@@ -150,6 +150,221 @@ def close_db(e=None):
 app.teardown_appcontext(close_db)
 
 # =====================================================
+# ROTAS PÚBLICAS
+# =====================================================
+
+@app.route('/')
+def splash():
+    """Página inicial da aplicação"""
+    return render_template('splash.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+@guest_required
+def login():
+    """Página de login"""
+    if not AUTH_AVAILABLE:
+        return "Sistema de autenticação não disponível", 500
+    
+    if request.method == 'POST':
+        try:
+            username = request.form['username']
+            password = request.form['password']
+            
+            db = get_db()
+            if not db:
+                flash('❌ Erro de conexão com banco de dados', 'error')
+                return render_template('login.html')
+            
+            # Usar o método authenticate que verifica a senha
+            user = User.authenticate(username, password, db)
+            
+            if user:
+                login_user(user)
+                flash(f'🎉 Bem-vindo, {user.first_name}!', 'success')
+                
+                # Redirecionar baseado no tipo de usuário
+                if user.is_admin:
+                    return redirect(url_for('admin_dashboard'))
+                elif user.is_professor:
+                    return redirect(url_for('professor_dashboard'))
+                else:
+                    return redirect(url_for('student_dashboard'))
+            else:
+                flash('❌ Usuário ou senha incorretos!', 'error')
+        except Exception as e:
+            print(f"❌ Erro no login: {e}")
+            flash('❌ Erro interno no sistema', 'error')
+    
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+@guest_required
+def register():
+    """Página de registro"""
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        user_type = request.form.get('user_type', 'aluno')
+        
+        # Validações
+        if not all([username, email, password, confirm_password, first_name, last_name]):
+            flash('❌ Por favor, preencha todos os campos.', 'error')
+            return render_template('register.html')
+        
+        if password != confirm_password:
+            flash('❌ As senhas não coincidem.', 'error')
+            return render_template('register.html')
+        
+        if len(password) < 6:
+            flash('❌ A senha deve ter pelo menos 6 caracteres.', 'error')
+            return render_template('register.html')
+        
+        # Validar tipo de usuário (apenas alunos podem se registrar)
+        if user_type != 'aluno':
+            flash('❌ Apenas alunos podem se registrar. Professores e administradores são criados pelo admin.', 'error')
+            return render_template('register.html')
+        
+        try:
+            db = get_db()
+            
+            # Verificar se username já existe
+            if User.get_by_username(username, db):
+                flash('❌ Este username já está em uso.', 'error')
+                return render_template('register.html')
+            
+            # Verificar se email já existe
+            if User.get_by_email(email, db):
+                flash('❌ Este email já está em uso.', 'error')
+                return render_template('register.html')
+            
+            # Criar usuário
+            user = User.create_user(username, email, password, first_name, last_name, user_type, db)
+            
+            flash('✅ Conta criada com sucesso! Faça login para continuar.', 'success')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            flash(f'❌ Erro ao criar conta: {str(e)}', 'error')
+    
+    return render_template('register.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    """Logout do usuário"""
+    logout_user()
+    flash('👋 Logout realizado com sucesso!', 'info')
+    return redirect(url_for('splash'))
+
+# =====================================================
+# ROTAS PROTEGIDAS - ADMIN
+# =====================================================
+
+@app.route('/admin/dashboard')
+@admin_required
+def admin_dashboard():
+    """Dashboard administrativo"""
+    return render_template('admin_dashboard.html')
+
+@app.route('/admin/usuarios')
+@admin_required
+def admin_usuarios():
+    """Gerenciamento de usuários"""
+    return render_template('admin_usuarios.html')
+
+@app.route('/admin/relatorios')
+@admin_required
+def admin_relatorios():
+    """Relatórios administrativos"""
+    return render_template('admin_relatorios.html')
+
+@app.route('/admin/relatorio/usuarios')
+@admin_required
+def admin_relatorio_usuarios():
+    """Relatório de usuários"""
+    return render_template('admin_relatorio_usuarios.html')
+
+@app.route('/admin/relatorio/turmas')
+@admin_required
+def admin_relatorio_turmas():
+    """Relatório de turmas"""
+    return render_template('admin_relatorio_turmas.html')
+
+@app.route('/admin/criar/usuario')
+@admin_required
+def admin_criar_usuario():
+    """Criar novo usuário"""
+    return render_template('admin_criar_usuario.html')
+
+@app.route('/admin/editar/usuario/<int:user_id>')
+@admin_required
+def admin_editar_usuario(user_id):
+    """Editar usuário existente"""
+    return render_template('admin_editar_usuario.html', user_id=user_id)
+
+# =====================================================
+# ROTAS PROTEGIDAS - PROFESSOR
+# =====================================================
+
+@app.route('/professor/dashboard')
+@professor_required
+def professor_dashboard():
+    """Dashboard do professor"""
+    return render_template('professor_dashboard.html')
+
+@app.route('/professor/turmas')
+@professor_required
+def professor_turmas():
+    """Turmas do professor"""
+    return render_template('professor_turmas.html')
+
+@app.route('/professor/aulas')
+@professor_required
+def professor_aulas():
+    """Aulas do professor"""
+    return render_template('professor_aulas.html')
+
+@app.route('/professor/relatorios')
+@professor_required
+def professor_relatorios():
+    """Relatórios do professor"""
+    return render_template('professor_relatorios.html')
+
+@app.route('/professor/relatorio/turma/<int:turma_id>')
+@professor_required
+def professor_relatorio_turma(turma_id):
+    """Relatório de turma específica"""
+    return render_template('professor_relatorio_turma.html', turma_id=turma_id)
+
+@app.route('/professor/relatorio/aluno/<int:aluno_id>')
+@professor_required
+def professor_relatorio_aluno(aluno_id):
+    """Relatório de aluno específico"""
+    return render_template('professor_relatorio_aluno.html', aluno_id=aluno_id)
+
+@app.route('/professor/criar/turma')
+@professor_required
+def professor_criar_turma():
+    """Criar nova turma"""
+    return render_template('professor_criar_turma.html')
+
+@app.route('/professor/criar/aula')
+@professor_required
+def professor_criar_aula():
+    """Criar nova aula"""
+    return render_template('professor_criar_aula.html')
+
+@app.route('/professor/editar/aula/<int:aula_id>')
+@professor_required
+def professor_editar_aula(aula_id):
+    """Editar aula existente"""
+    return render_template('professor_editar_aula.html', aula_id=aula_id)
+
+# =====================================================
 # ROTAS PROTEGIDAS - ALUNO
 # =====================================================
 
