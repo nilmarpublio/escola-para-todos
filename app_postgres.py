@@ -86,6 +86,64 @@ if SWAGGER_AVAILABLE:
 else:
     print("⚠️ Swagger não configurado - api.swagger não disponível")
 
+def create_default_users():
+    """Cria usuários padrão se não existirem"""
+    try:
+        db = get_db()
+        if not db:
+            print("⚠️ Não foi possível conectar ao banco para criar usuários padrão")
+            return
+        
+        cur = db.cursor()
+        
+        # Verificar se já existem usuários
+        cur.execute("SELECT COUNT(*) as count FROM users")
+        user_count = cur.fetchone()['count']
+        
+        if user_count > 1:  # Se já tem mais de 1 usuário, não precisa criar
+            print(f"✅ Usuários já existem no banco ({user_count} usuários)")
+            cur.close()
+            return
+        
+        print("🔧 Criando usuários padrão...")
+        
+        # Usuários padrão
+        default_users = [
+            ('admin', 'admin123', 'admin', 'Admin', 'Sistema', 'admin@escola.com'),
+            ('prof.matematica', 'prof123', 'professor', 'João', 'Silva', 'joao.silva@escola.com'),
+            ('prof.portugues', 'prof123', 'professor', 'Maria', 'Santos', 'maria.santos@escola.com'),
+            ('aluno.joao', 'aluno123', 'aluno', 'João', 'Pereira', 'joao.pereira@escola.com'),
+            ('aluno.ana', 'aluno123', 'aluno', 'Ana', 'Costa', 'ana.costa@escola.com'),
+            ('aluno.pedro', 'aluno123', 'aluno', 'Pedro', 'Oliveira', 'pedro.oliveira@escola.com'),
+        ]
+        
+        for username, password, user_type, first_name, last_name, email in default_users:
+            # Verificar se o usuário já existe
+            cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+            existing_user = cur.fetchone()
+            
+            if not existing_user:
+                # Criar novo usuário
+                from werkzeug.security import generate_password_hash
+                hashed_password = generate_password_hash(password)
+                
+                cur.execute("""
+                    INSERT INTO users (username, password_hash, user_type, first_name, last_name, email, is_active)
+                    VALUES (%s, %s, %s, %s, %s, %s, true)
+                """, (username, hashed_password, user_type, first_name, last_name, email))
+                print(f"   ✅ Criado: {username} ({user_type})")
+            else:
+                print(f"   🔄 Já existe: {username}")
+        
+        db.commit()
+        cur.close()
+        print("🎉 Usuários padrão criados com sucesso!")
+        
+    except Exception as e:
+        print(f"❌ Erro ao criar usuários padrão: {e}")
+        import traceback
+        traceback.print_exc()
+
 # Funções auxiliares para os templates
 @app.context_processor
 def utility_processor():
@@ -1488,5 +1546,9 @@ def test_redirect():
     """
 
 if __name__ == '__main__':
+    # Criar usuários padrão na primeira execução
+    with app.app_context():
+        create_default_users()
+    
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
