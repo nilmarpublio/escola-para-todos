@@ -68,7 +68,7 @@
                                         <label for="username" class="form-label">
                                             <i class="fas fa-user me-2"></i>Nome de Usuário
                                         </label>
-                                        <input type="text" class="form-control" id="username" value="{{ usuario[1] }}"
+                                        <input type="text" class="form-control" id="username" value="{{ usuario.username }}"
                                             readonly>
                                         <div class="form-text">Nome de usuário não pode ser alterado</div>
                                     </div>
@@ -77,7 +77,7 @@
                                             <i class="fas fa-envelope me-2"></i>Email <span class="text-danger">*</span>
                                         </label>
                                         <input type="email" class="form-control" id="email" name="email"
-                                            value="{{ usuario[2] }}" required>
+                                            value="{{ usuario.email }}" required>
                                         <div class="form-text">Email válido para contato</div>
                                     </div>
                                 </div>
@@ -88,7 +88,7 @@
                                             <i class="fas fa-id-card me-2"></i>Nome <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control" id="first_name" name="first_name"
-                                            value="{{ usuario[5] }}" required minlength="2" maxlength="50">
+                                            value="{{ usuario.first_name }}" required minlength="2" maxlength="50">
                                         <div class="form-text">Nome real do usuário</div>
                                     </div>
                                     <div class="col-md-6 mb-3">
@@ -97,7 +97,7 @@
                                                 class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control" id="last_name" name="last_name"
-                                            value="{{ usuario[6] }}" required minlength="2" maxlength="50">
+                                            value="{{ usuario.last_name }}" required minlength="2" maxlength="50">
                                         <div class="form-text">Sobrenome do usuário</div>
                                     </div>
                                 </div>
@@ -109,12 +109,12 @@
                                                 class="text-danger">*</span>
                                         </label>
                                         <select class="form-select" id="user_type" name="user_type" required>
-                                            <option value="aluno" {{ 'selected' if usuario[3]=='aluno' }}>👨‍🎓 Aluno
-                                            </option>
-                                            <option value="professor" {{ 'selected' if usuario[3]=='professor' }}>👨‍🏫
-                                                Professor</option>
-                                            <option value="admin" {{ 'selected' if usuario[3]=='admin' }}>👨‍💼
-                                                Administrador</option>
+                                                                                    <option value="aluno" {{ 'selected' if usuario.user_type=='aluno' }}>👨‍🎓 Aluno
+                                        </option>
+                                        <option value="professor" {{ 'selected' if usuario.user_type=='professor' }}>👨‍🏫
+                                            Professor</option>
+                                        <option value="admin" {{ 'selected' if usuario.user_type=='admin' }}>👨‍💼
+                                            Administrador</option>
                                         </select>
                                         <div class="form-text">Define as permissões do usuário no sistema</div>
                                     </div>
@@ -123,7 +123,7 @@
                                             <i class="fas fa-calendar me-2"></i>Data de Criação
                                         </label>
                                         <input type="text" class="form-control" id="created_at"
-                                            value="{{ format_datetime(usuario[4], '%d/%m/%Y %H:%M') }}" readonly>
+                                            value="{{ format_datetime(usuario.created_at, '%d/%m/%Y %H:%M') }}" readonly>
                                         <div class="form-text">Data em que o usuário foi criado</div>
                                     </div>
                                 </div>

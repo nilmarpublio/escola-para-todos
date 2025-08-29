@@ -406,7 +406,28 @@ def admin_dashboard():
 @admin_required
 def admin_usuarios():
     """Gerenciamento de usuários"""
-    return render_template('admin_usuarios.html')
+    try:
+        db = get_db()
+        if not db:
+            flash('Erro de conexão com o banco de dados', 'error')
+            return render_template('admin_usuarios.html', usuarios=[])
+        
+        cur = db.cursor()
+        
+        # Buscar todos os usuários
+        cur.execute("""
+            SELECT id, username, email, user_type, first_name, last_name, is_active, created_at, updated_at
+            FROM users
+            ORDER BY created_at DESC
+        """)
+        usuarios = cur.fetchall()
+        cur.close()
+        
+        return render_template('admin_usuarios.html', usuarios=usuarios)
+        
+    except Exception as e:
+        flash(f'Erro ao carregar usuários: {e}', 'error')
+        return render_template('admin_usuarios.html', usuarios=[])
 
 @app.route('/admin/relatorios')
 @admin_required
@@ -481,16 +502,153 @@ def admin_criar_usuario():
     
     return render_template('admin_criar_usuario.html')
 
-@app.route('/admin/editar/usuario/<int:user_id>')
+@app.route('/admin/editar/usuario/<int:user_id>', methods=['GET', 'POST'])
 @admin_required
 def admin_editar_usuario(user_id):
     """Editar usuário existente"""
-    return render_template('admin_editar_usuario.html', user_id=user_id)
+    try:
+        db = get_db()
+        if not db:
+            flash('Erro de conexão com o banco de dados', 'error')
+            return redirect(url_for('admin_usuarios'))
+        
+        cur = db.cursor()
+        
+        if request.method == 'POST':
+            # Atualizar usuário
+            username = request.form.get('username')
+            email = request.form.get('email')
+            user_type = request.form.get('user_type')
+            first_name = request.form.get('first_name')
+            last_name = request.form.get('last_name')
+            is_active = request.form.get('is_active') == 'on'
+            
+            # Verificar se username/email já existe em outro usuário
+            cur.execute("""
+                SELECT id FROM users 
+                WHERE (username = %s OR email = %s) AND id != %s
+            """, (username, email, user_id))
+            existing_user = cur.fetchone()
+            
+            if existing_user:
+                flash('Username ou email já existe em outro usuário', 'error')
+                cur.close()
+                return redirect(url_for('admin_editar_usuario', user_id=user_id))
+            
+            # Atualizar usuário
+            cur.execute("""
+                UPDATE users 
+                SET username = %s, email = %s, user_type = %s, first_name = %s, last_name = %s, 
+                    is_active = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (username, email, user_type, first_name, last_name, is_active, user_id))
+            
+            db.commit()
+            cur.close()
+            
+            flash('Usuário atualizado com sucesso!', 'success')
+            return redirect(url_for('admin_usuarios'))
+        
+        # Buscar dados do usuário para edição
+        cur.execute("""
+            SELECT id, username, email, user_type, first_name, last_name, is_active, created_at, updated_at
+            FROM users WHERE id = %s
+        """, (user_id,))
+        usuario = cur.fetchone()
+        cur.close()
+        
+        if not usuario:
+            flash('Usuário não encontrado', 'error')
+            return redirect(url_for('admin_usuarios'))
+        
+        return render_template('admin_editar_usuario.html', usuario=usuario)
+        
+    except Exception as e:
+        flash(f'Erro ao editar usuário: {e}', 'error')
+        return redirect(url_for('admin_usuarios'))
 
 
+
+@app.route('/admin/usuarios/<int:user_id>/excluir', methods=['POST'])
+@admin_required
+def admin_excluir_usuario(user_id):
+    """Excluir usuário"""
+    try:
+        # Não permitir excluir o próprio usuário
+        if current_user.id == user_id:
+            flash('Não é possível excluir seu próprio usuário', 'error')
+            return redirect(url_for('admin_usuarios'))
+        
+        db = get_db()
+        if not db:
+            flash('Erro de conexão com o banco de dados', 'error')
+            return redirect(url_for('admin_usuarios'))
+        
+        cur = db.cursor()
+        
+        # Verificar se usuário existe
+        cur.execute("SELECT username, user_type FROM users WHERE id = %s", (user_id,))
+        usuario = cur.fetchone()
+        
+        if not usuario:
+            flash('Usuário não encontrado', 'error')
+            cur.close()
+            return redirect(url_for('admin_usuarios'))
+        
+        # Excluir usuário
+        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        db.commit()
+        cur.close()
+        
+        flash(f'Usuário {usuario["username"]} excluído com sucesso!', 'success')
+        return redirect(url_for('admin_usuarios'))
+        
+    except Exception as e:
+        flash(f'Erro ao excluir usuário: {e}', 'error')
+        return redirect(url_for('admin_usuarios'))
+
+@app.route('/admin/usuarios/<int:user_id>/toggle-status', methods=['POST'])
+@admin_required
+def admin_toggle_status_usuario(user_id):
+    """Ativar/desativar usuário"""
+    try:
+        # Não permitir desativar o próprio usuário
+        if current_user.id == user_id:
+            flash('Não é possível desativar seu próprio usuário', 'error')
+            return redirect(url_for('admin_usuarios'))
+        
+        db = get_db()
+        if not db:
+            flash('Erro de conexão com o banco de dados', 'error')
+            return redirect(url_for('admin_usuarios'))
+        
+        cur = db.cursor()
+        
+        # Buscar status atual
+        cur.execute("SELECT username, is_active FROM users WHERE id = %s", (user_id,))
+        usuario = cur.fetchone()
+        
+        if not usuario:
+            flash('Usuário não encontrado', 'error')
+            cur.close()
+            return redirect(url_for('admin_usuarios'))
+        
+        # Alternar status
+        novo_status = not usuario['is_active']
+        cur.execute("UPDATE users SET is_active = %s, updated_at = NOW() WHERE id = %s", (novo_status, user_id))
+        db.commit()
+        cur.close()
+        
+        status_texto = "ativado" if novo_status else "desativado"
+        flash(f'Usuário {usuario["username"]} {status_texto} com sucesso!', 'success')
+        return redirect(url_for('admin_usuarios'))
+        
+    except Exception as e:
+        flash(f'Erro ao alterar status do usuário: {e}', 'error')
+        return redirect(url_for('admin_usuarios'))
 
 # =====================================================
-# ROTAS PROTEGIDAS - PROFESSOR
+# ROTAS PROTEGADAS - PROFESSOR
 # =====================================================
 
 @app.route('/professor/dashboard')
