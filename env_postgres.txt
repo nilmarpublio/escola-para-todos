@@ -9,8 +9,8 @@ SECRET_KEY=dev-secret-key-change-in-production
 # Configurações do Banco PostgreSQL Local
 DB_HOST=localhost
 DB_NAME=escola_para_todos
-DB_USER=escola_user
-DB_PASSWORD=escola123
+DB_USER=postgres
+DB_PASSWORD=postgres
 
 # Para produção no Render, o DATABASE_URL será fornecido automaticamente
 # DATABASE_URL=postgresql://user:password@host:port/database

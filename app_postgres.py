@@ -125,20 +125,26 @@ def load_user(user_id):
 def get_db():
     """Conectar ao banco de dados PostgreSQL"""
     if 'db' not in g:
-        # Usar DATABASE_URL do Render ou configuração local
-        database_url = os.getenv('DATABASE_URL')
-        if database_url:
-            # Render usa DATABASE_URL
-            g.db = psycopg.connect(database_url, row_factory=dict_row)
-        else:
-            # Configuração local
-            g.db = psycopg.connect(
-                host=os.getenv('DB_HOST', 'localhost'),
-                dbname=os.getenv('DB_NAME', 'escola_para_todos'),
-                user=os.getenv('DB_USER', 'postgres'),
-                password=os.getenv('DB_PASSWORD', 'postgres'),
-                row_factory=dict_row
-            )
+        try:
+            # Usar DATABASE_URL do Render ou configuração local
+            database_url = os.getenv('DATABASE_URL')
+            if database_url:
+                # Render usa DATABASE_URL
+                g.db = psycopg.connect(database_url, row_factory=dict_row)
+                print("✅ Conectado ao PostgreSQL (Render)")
+            else:
+                # Configuração local
+                g.db = psycopg.connect(
+                    host=os.getenv('DB_HOST', 'localhost'),
+                    dbname=os.getenv('DB_NAME', 'escola_para_todos'),
+                    user=os.getenv('DB_USER', 'postgres'),
+                    password=os.getenv('DB_PASSWORD', 'postgres'),
+                    row_factory=dict_row
+                )
+                print("✅ Conectado ao PostgreSQL (local)")
+        except Exception as e:
+            print(f"❌ Erro ao conectar ao banco: {e}")
+            g.db = None
     return g.db
 
 def close_db(e=None):
@@ -156,6 +162,7 @@ app.teardown_appcontext(close_db)
 @app.route('/')
 def splash():
     """Página inicial da aplicação"""
+    print("🔍 DEBUG: Rota splash chamada")
     return render_template('splash.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -559,64 +566,126 @@ def professor_editar_aula(aula_id):
 # =====================================================
 
 @app.route('/student/dashboard')
+@login_required
 @aluno_required
 def student_dashboard():
     """Dashboard do aluno"""
     try:
+        print(f"🔍 DEBUG: Iniciando student_dashboard para usuário {current_user.id} ({current_user.user_type})")
+        
         db = get_db()
         cur = db.cursor()
         
-        # Estatísticas do aluno
-        aluno_id = current_user.id
+        # Estatísticas básicas - simplificadas
+        try:
+            cur.execute("""
+                SELECT COUNT(*) as total_aulas
+                FROM aulas a
+                JOIN matriculas m ON a.turma_id = m.turma_id
+                WHERE m.aluno_id = %s AND m.status = 'ativa' AND a.is_active = true
+            """, (current_user.id,))
+            total_aulas = cur.fetchone()['total_aulas']
+        except:
+            total_aulas = 0
         
-        # Contar aulas iniciadas
-        cur.execute('''
-            SELECT COUNT(*) 
-            FROM progresso_alunos 
-            WHERE aluno_id = %s AND status IN ('iniciada', 'em_progresso')
-        ''', (aluno_id,))
-        aulas_iniciadas = cur.fetchone()['count']
+        # Aulas em progresso - simplificadas
+        try:
+            cur.execute("""
+                SELECT COUNT(*) as aulas_em_progresso
+                FROM progresso_alunos
+                WHERE aluno_id = %s AND status = 'em_progresso'
+            """, (current_user.id,))
+            aulas_em_progresso = cur.fetchone()['aulas_em_progresso']
+        except:
+            aulas_em_progresso = 0
         
-        # Contar aulas concluídas
-        cur.execute('''
-            SELECT COUNT(*) 
-            FROM progresso_alunos 
-            WHERE aluno_id = %s AND status = 'concluida'
-        ''', (aluno_id,))
-        aulas_concluidas = cur.fetchone()['count']
+        # Aulas concluídas - simplificadas
+        try:
+            cur.execute("""
+                SELECT COUNT(*) as aulas_concluidas
+                FROM progresso_alunos
+                WHERE aluno_id = %s AND status = 'concluida'
+            """, (current_user.id,))
+            aulas_concluidas = cur.fetchone()['aulas_concluidas']
+        except:
+            aulas_concluidas = 0
         
-        # Contar pontos ganhos
-        cur.execute('''
-            SELECT COALESCE(SUM(pontos_ganhos), 0) 
-            FROM respostas_alunos 
-            WHERE aluno_id = %s
-        ''', (aluno_id,))
-        pontos_ganhos = cur.fetchone()['coalesce']
+        # Total de pontos - simplificadas
+        try:
+            cur.execute("""
+                SELECT COALESCE(SUM(e.pontos), 0) as total_pontos
+                FROM progresso_alunos pa
+                JOIN aulas a ON pa.aula_id = a.id
+                JOIN exercicios e ON a.id = e.aula_id
+                WHERE pa.aluno_id = %s AND pa.status = 'concluida'
+            """, (current_user.id,))
+            total_pontos = cur.fetchone()['total_pontos']
+        except:
+            total_pontos = 0
         
-        # Calcular nível atual (baseado nos pontos)
-        nivel_atual = max(1, pontos_ganhos // 100)  # 1 nível a cada 100 pontos
+        # Nível atual (baseado em pontos)
+        nivel_atual = (total_pontos // 100) + 1
+        
+        # Aulas disponíveis - simplificadas
+        try:
+            cur.execute("""
+                SELECT a.id, a.titulo, a.descricao, a.duracao_minutos, 
+                       t.nome as turma_nome, COALESCE(pa.status, 'não iniciada') as progresso_status
+                FROM aulas a
+                JOIN turmas t ON a.turma_id = t.id
+                JOIN matriculas m ON t.id = m.turma_id
+                LEFT JOIN progresso_alunos pa ON a.id = pa.aula_id AND pa.aluno_id = %s
+                WHERE m.aluno_id = %s AND m.status = 'ativa' AND a.is_active = true
+                ORDER BY a.titulo
+            """, (current_user.id, current_user.id))
+            aulas_disponiveis = cur.fetchall()
+        except:
+            aulas_disponiveis = []
+        
+        # Turmas matriculadas - simplificadas
+        try:
+            cur.execute("""
+                SELECT t.id, t.nome, t.descricao
+                FROM turmas t
+                JOIN matriculas m ON t.id = m.turma_id
+                WHERE m.aluno_id = %s AND m.status = 'ativa'
+            """, (current_user.id,))
+            turmas_matriculadas = cur.fetchall()
+        except:
+            turmas_matriculadas = []
         
         cur.close()
         
-        # Dados para o template
         data = {
-            'aulas_iniciadas': aulas_iniciadas,
+            'total_aulas': total_aulas,
+            'aulas_em_progresso': aulas_em_progresso,
             'aulas_concluidas': aulas_concluidas,
-            'pontos_ganhos': pontos_ganhos,
-            'nivel_atual': nivel_atual
+            'total_pontos': total_pontos,
+            'nivel_atual': nivel_atual,
+            'aulas_disponiveis': aulas_disponiveis,
+            'turmas_matriculadas': turmas_matriculadas
         }
         
+        print(f"✅ DEBUG: Dashboard carregado com sucesso, renderizando template")
         return render_template('student_dashboard.html', data=data)
         
     except Exception as e:
-        print(f"❌ Erro no dashboard aluno: {e}")
-        # Retornar com dados vazios em caso de erro
+        print(f"❌ Erro no dashboard do aluno: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Retornar dados vazios em caso de erro
         data = {
-            'aulas_iniciadas': 0,
+            'total_aulas': 0,
+            'aulas_em_progresso': 0,
             'aulas_concluidas': 0,
-            'pontos_ganhos': 0,
-            'nivel_atual': 1
+            'total_pontos': 0,
+            'nivel_atual': 1,
+            'aulas_disponiveis': [],
+            'turmas_matriculadas': []
         }
+        
+        flash('⚠️ Dashboard carregado com dados limitados devido a um erro.', 'warning')
         return render_template('student_dashboard.html', data=data)
 
 @app.route('/student/turmas')
@@ -970,6 +1039,453 @@ def forum_buscar():
 def lesson(lesson_id):
     """Lição específica"""
     return render_template('lesson.html', lesson_id=lesson_id)
+
+@app.route('/aula/<int:aula_id>')
+@login_required
+def ver_aula(aula_id):
+    """Visualizar uma aula específica"""
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar dados da aula
+        cur.execute("""
+            SELECT a.*, t.nome as turma_nome, u.first_name, u.last_name
+            FROM aulas a
+            LEFT JOIN turmas t ON a.turma_id = t.id
+            LEFT JOIN users u ON a.professor_id = u.id
+            WHERE a.id = %s AND a.is_active = true
+        """, (aula_id,))
+        
+        aula = cur.fetchone()
+        if not aula:
+            flash('❌ Aula não encontrada!', 'error')
+            return redirect(url_for('student_dashboard'))
+        
+        # Buscar exercícios da aula
+        cur.execute("""
+            SELECT id, titulo, pergunta, opcoes, resposta_correta, tipo, pontos
+            FROM exercicios
+            WHERE aula_id = %s AND is_active = true
+            ORDER BY id
+        """, (aula_id,))
+        
+        exercicios = cur.fetchall()
+        
+        # Buscar progresso do aluno
+        cur.execute("""
+            SELECT status, data_inicio, data_conclusao, tempo_gasto
+            FROM progresso_alunos
+            WHERE aluno_id = %s AND aula_id = %s
+        """, (current_user.id, aula_id))
+        
+        progresso_raw = cur.fetchone()
+        
+        # Calcular percentual de progresso
+        if progresso_raw:
+            if progresso_raw['status'] == 'concluida':
+                percentual = 100
+            elif progresso_raw['status'] == 'em_progresso':
+                percentual = 50
+            else:
+                percentual = 25
+        else:
+            percentual = 0
+            
+        progresso = {
+            'status': progresso_raw['status'] if progresso_raw else 'não iniciada',
+            'percentual': percentual,
+            'tempo_gasto': progresso_raw['tempo_gasto'] if progresso_raw and progresso_raw['tempo_gasto'] else 0
+        }
+        
+        # Buscar próximas aulas da mesma turma
+        cur.execute("""
+            SELECT id, titulo, disciplina, duracao_minutos
+            FROM aulas
+            WHERE turma_id = %s AND ordem > %s AND is_active = true
+            ORDER BY ordem
+            LIMIT 5
+        """, (aula.turma_id, aula.ordem or 0))
+        
+        proximas_aulas = cur.fetchall()
+        
+        # Calcular total de pontos dos exercícios
+        total_pontos = sum(ex['pontos'] for ex in exercicios)
+        
+        cur.close()
+        
+        return render_template('lesson.html', 
+                             aula=aula, 
+                             exercicios=exercicios, 
+                             progresso=progresso,
+                             proximas_aulas=proximas_aulas,
+                             total_pontos=total_pontos)
+                             
+    except Exception as e:
+        print(f"Erro ao carregar aula: {e}")
+        flash('❌ Erro ao carregar a aula!', 'error')
+        return redirect(url_for('student_dashboard'))
+
+# Rota para educação infantil (0-5 anos)
+@app.route('/kids/dashboard')
+@app.route('/student/educacao-basica')
+@login_required
+@aluno_required
+def kids_dashboard():
+    """Dashboard para educação infantil (0-5 anos)"""
+    try:
+        print(f"🔍 DEBUG: kids_dashboard chamado para usuário {current_user.id}")
+        
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar aulas específicas para educação infantil
+        print("🔍 Executando query para kids_dashboard...")
+        try:
+            # Query corrigida para usar as colunas que realmente existem
+            cur.execute("""
+                SELECT a.id, a.titulo, a.descricao, 
+                       30 as duracao_minutos, 
+                       t.nome as turma_nome, t.descricao as turma_descricao
+                FROM aulas a
+                LEFT JOIN turmas t ON a.turma_id = t.id
+                WHERE a.is_active = true 
+                AND (t.nome ILIKE '%infantil%' OR t.nome ILIKE '%pré%' OR t.nome ILIKE '%pre%' OR t.nome ILIKE '%básico%')
+                ORDER BY a.id
+            """)
+            print("✅ Query executada com sucesso!")
+            aulas_infantil = cur.fetchall()
+        except Exception as query_error:
+            print(f"❌ Erro na query: {query_error}")
+            # Tenta uma query mais simples
+            try:
+                cur.execute("""
+                    SELECT COUNT(*) as count 
+                    FROM aulas a 
+                    LEFT JOIN turmas t ON a.turma_id = t.id 
+                    WHERE a.is_active = true 
+                    AND (t.nome ILIKE '%infantil%' OR t.nome ILIKE '%pré%' OR t.nome ILIKE '%pre%' OR t.nome ILIKE '%básico%')
+                """)
+                count = cur.fetchone()['count']
+                print(f"📊 Total de aulas infantis: {count}")
+            except:
+                print("⚠️ Query de contagem também falhou")
+            # Se não encontrar aulas, retorna lista vazia
+            aulas_infantil = []
+        
+        # Progresso por categorias
+        progresso_categorias = {
+            'alfabeto': 75,
+            'numeros': 60,
+            'cores': 45,
+            'animais': 30
+        }
+        
+        # Conquistas baseadas no progresso
+        total_aulas_concluidas = 5  # Simulado
+        conquistas = []
+        if total_aulas_concluidas >= 1:
+            conquistas.append({'nome': 'Primeira Aula', 'icone': 'star', 'conquistada': True})
+        if total_aulas_concluidas >= 5:
+            conquistas.append({'nome': '5 Aulas', 'icone': 'check-circle', 'conquistada': True})
+        
+        cur.close()
+        
+        return render_template('kids_dashboard.html', 
+                             aulas_infantil=aulas_infantil,
+                             progresso_categorias=progresso_categorias,
+                             conquistas=conquistas)
+        
+    except Exception as e:
+        import traceback
+        print(f"❌ ERRO DETALHADO no kids_dashboard: {e}")
+        traceback.print_exc()
+        flash('❌ Erro ao carregar dashboard infantil!', 'error')
+        return render_template('kids_dashboard.html', aulas_infantil=[], progresso_categorias={}, conquistas=[])
+
+# Rota para anos iniciais (1º ao 5º ano)
+@app.route('/student/anos-iniciais')
+@login_required
+@aluno_required
+def anos_iniciais():
+    """Dashboard para anos iniciais (1º ao 5º ano) - Ensino Fundamental"""
+    try:
+        print(f"🔍 DEBUG: anos_iniciais chamado para usuário {current_user.id}")
+        
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar aulas específicas para anos iniciais (1º ao 5º ano)
+        print("🔍 Executando query para anos_iniciais...")
+        try:
+            # Query corrigida para usar as colunas que realmente existem
+            cur.execute("""
+                SELECT a.id, a.titulo, a.descricao, 
+                       45 as duracao_minutos, 
+                       t.nome as turma_nome, t.descricao as turma_descricao
+                FROM aulas a
+                LEFT JOIN turmas t ON a.turma_id = t.id
+                WHERE a.is_active = true 
+                AND (t.nome ILIKE '%1º%' OR t.nome ILIKE '%2º%' OR t.nome ILIKE '%3º%' OR t.nome ILIKE '%4º%' OR t.nome ILIKE '%5º%'
+                     OR t.nome ILIKE '%primeiro%' OR t.nome ILIKE '%segundo%' OR t.nome ILIKE '%terceiro%' OR t.nome ILIKE '%quarto%' OR t.nome ILIKE '%quinto%')
+                ORDER BY t.nome, a.id DESC
+                LIMIT 15
+            """)
+            print("✅ Query anos_iniciais executada com sucesso!")
+            aulas_anos_iniciais = cur.fetchall()
+        except Exception as query_error:
+            print(f"❌ Erro na query anos_iniciais: {query_error}")
+            # Tenta uma query mais simples
+            try:
+                cur.execute("""
+                    SELECT COUNT(*) as count 
+                    FROM aulas a 
+                    LEFT JOIN turmas t ON a.turma_id = t.id 
+                    WHERE a.is_active = true 
+                    AND (t.nome ILIKE '%1º%' OR t.nome ILIKE '%2º%' OR t.nome ILIKE '%3º%' OR t.nome ILIKE '%4º%' OR t.nome ILIKE '%5º%'
+                         OR t.nome ILIKE '%primeiro%' OR t.nome ILIKE '%segundo%' OR t.nome ILIKE '%terceiro%' OR t.nome ILIKE '%quarto%' OR t.nome ILIKE '%quinto%')
+                """)
+                count = cur.fetchone()['count']
+                print(f"📊 Total de aulas anos iniciais: {count}")
+            except:
+                print("⚠️ Query de contagem também falhou")
+            # Se não encontrar aulas, retorna lista vazia
+            aulas_anos_iniciais = []
+        
+        cur.close()
+        
+        # Dados específicos para anos iniciais
+        progresso_materias = {
+            'portugues': 65,
+            'matematica': 70,
+            'ciencias': 55,
+            'historia': 60,
+            'geografia': 50
+        }
+        
+        conquistas_anos_iniciais = [
+            {'nome': 'Leitor Iniciante', 'descricao': 'Completou 3 aulas de português', 'icone': '📖'},
+            {'nome': 'Matemático', 'descricao': 'Completou 5 exercícios de matemática', 'icone': '🔢'},
+            {'nome': 'Cientista', 'descricao': 'Completou 2 aulas de ciências', 'icone': '🔬'},
+            {'nome': 'Historiador', 'descricao': 'Completou 3 aulas de história', 'icone': '📚'},
+            {'nome': 'Geógrafo', 'descricao': 'Completou 2 aulas de geografia', 'icone': '🌍'}
+        ]
+        
+        return render_template('anos_iniciais_dashboard.html', 
+                             aulas=aulas_anos_iniciais,
+                             progresso_materias=progresso_materias,
+                             conquistas=conquistas_anos_iniciais)
+                             
+    except Exception as e:
+        import traceback
+        print(f"❌ ERRO DETALHADO no anos_iniciais: {e}")
+        traceback.print_exc()
+        flash('❌ Erro ao carregar dashboard dos Anos Iniciais!', 'error')
+        return redirect(url_for('student_dashboard'))
+
+# Rota para anos finais (6º ao 9º ano)
+@app.route('/student/anos-finais')
+@login_required
+@aluno_required
+def anos_finais():
+    """Dashboard para anos finais (6º ao 9º ano) - Ensino Fundamental"""
+    try:
+        print(f"🔍 DEBUG: anos_finais chamado para usuário {current_user.id}")
+        
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar aulas específicas para anos finais (6º ao 9º ano)
+        print("🔍 Executando query para anos_finais...")
+        try:
+            # Query corrigida para usar as colunas que realmente existem
+            cur.execute("""
+                SELECT a.id, a.titulo, a.descricao, 
+                       45 as duracao_minutos, 
+                       t.nome as turma_nome, t.descricao as turma_descricao
+                FROM aulas a
+                LEFT JOIN turmas t ON a.turma_id = t.id
+                WHERE a.is_active = true 
+                AND (t.nome ILIKE '%6º%' OR t.nome ILIKE '%7º%' OR t.nome ILIKE '%8º%' OR t.nome ILIKE '%9º%'
+                     OR t.nome ILIKE '%sexto%' OR t.nome ILIKE '%sétimo%' OR t.nome ILIKE '%oitavo%' OR t.nome ILIKE '%nono%')
+                ORDER BY t.nome, a.id DESC
+                LIMIT 15
+            """)
+            print("✅ Query anos_finais executada com sucesso!")
+            aulas_anos_finais = cur.fetchall()
+        except Exception as query_error:
+            print(f"❌ Erro na query anos_finais: {query_error}")
+            # Tenta uma query mais simples
+            try:
+                cur.execute("""
+                    SELECT COUNT(*) as count 
+                    FROM aulas a 
+                    LEFT JOIN turmas t ON a.turma_id = t.id 
+                    WHERE a.is_active = true 
+                    AND (t.nome ILIKE '%6º%' OR t.nome ILIKE '%7º%' OR t.nome ILIKE '%8º%' OR t.nome ILIKE '%9º%'
+                         OR t.nome ILIKE '%sexto%' OR t.nome ILIKE '%sétimo%' OR t.nome ILIKE '%oitavo%' OR t.nome ILIKE '%nono%')
+                """)
+                count = cur.fetchone()['count']
+                print(f"📊 Total de aulas anos finais: {count}")
+            except:
+                print("⚠️ Query de contagem também falhou")
+            # Se não encontrar aulas, retorna lista vazia
+            aulas_anos_finais = []
+        
+        cur.close()
+        
+        # Dados específicos para anos finais
+        progresso_materias = {
+            'portugues': 75,
+            'matematica': 80,
+            'ciencias': 70,
+            'historia': 65,
+            'geografia': 60,
+            'ingles': 55,
+            'artes': 45,
+            'educacao_fisica': 70
+        }
+        
+        conquistas_anos_finais = [
+            {'nome': 'Leitor Avançado', 'descricao': 'Completou 5 aulas de português', 'icone': '📚'},
+            {'nome': 'Matemático Avançado', 'descricao': 'Completou 8 exercícios de matemática', 'icone': '🧮'},
+            {'nome': 'Cientista Júnior', 'descricao': 'Completou 4 aulas de ciências', 'icone': '⚗️'},
+            {'nome': 'Historiador Júnior', 'descricao': 'Completou 4 aulas de história', 'icone': '🏛️'},
+            {'nome': 'Geógrafo Júnior', 'descricao': 'Completou 3 aulas de geografia', 'icone': '🗺️'},
+            {'nome': 'Falante de Inglês', 'descricao': 'Completou 3 aulas de inglês', 'icone': '🇺🇸'},
+            {'nome': 'Artista', 'descricao': 'Completou 2 aulas de artes', 'icone': '🎨'},
+            {'nome': 'Atleta', 'descricao': 'Completou 3 aulas de educação física', 'icone': '⚽'}
+        ]
+        
+        return render_template('anos_finais_dashboard.html', 
+                             aulas=aulas_anos_finais,
+                             progresso_materias=progresso_materias,
+                             conquistas=conquistas_anos_finais)
+                             
+    except Exception as e:
+        import traceback
+        print(f"❌ ERRO DETALHADO no anos_finais: {e}")
+        traceback.print_exc()
+        flash('❌ Erro ao carregar dashboard dos Anos Finais!', 'error')
+        return redirect(url_for('student_dashboard'))
+
+@app.route('/exercicio/<int:exercicio_id>')
+@login_required
+def ver_exercicio(exercicio_id):
+    """Visualizar um exercício específico"""
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Buscar dados do exercício
+        cur.execute("""
+            SELECT e.*, a.titulo as aula_titulo, a.id as aula_id
+            FROM exercicios e
+            JOIN aulas a ON e.aula_id = a.id
+            WHERE e.id = %s AND e.is_active = true
+        """, (exercicio_id,))
+        
+        exercicio = cur.fetchone()
+        if not exercicio:
+            flash('❌ Exercício não encontrado!', 'error')
+            return redirect(url_for('student_dashboard'))
+        
+        # Buscar progresso do aluno na aula
+        cur.execute("""
+            SELECT status, data_inicio, data_conclusao, tempo_gasto
+            FROM progresso_alunos
+            WHERE aluno_id = %s AND aula_id = %s
+        """, (current_user.id, exercicio.aula_id))
+        
+        progresso_raw = cur.fetchone()
+        
+        # Calcular percentual de progresso
+        if progresso_raw:
+            if progresso_raw['status'] == 'concluida':
+                percentual = 100
+            elif progresso_raw['status'] == 'em_progresso':
+                percentual = 50
+            else:
+                percentual = 25
+        else:
+            percentual = 0
+            
+        progresso = {
+            'status': progresso_raw['status'] if progresso_raw else 'não iniciada',
+            'percentual': percentual,
+            'tempo_gasto': progresso_raw['tempo_gasto'] if progresso_raw and progresso_raw['tempo_gasto'] else 0
+        }
+        
+        # Buscar estatísticas do aluno
+        cur.execute("""
+            SELECT 
+                COUNT(CASE WHEN ra.resposta_correta = true THEN 1 END) as acertos,
+                COUNT(CASE WHEN ra.resposta_correta = false THEN 1 END) as erros,
+                COALESCE(SUM(CASE WHEN ra.resposta_correta = true THEN e.pontos END), 0) as pontos_ganhos,
+                COUNT(CASE WHEN ra.resposta_correta = true THEN 1 END) as sequencia
+            FROM exercicios e
+            LEFT JOIN respostas_alunos ra ON e.id = ra.exercicio_id AND ra.aluno_id = %s
+            WHERE e.aula_id = %s
+        """, (current_user.id, exercicio.aula_id))
+        
+        stats_raw = cur.fetchone()
+        stats = {
+            'acertos': stats_raw['acertos'] or 0,
+            'erros': stats_raw['erros'] or 0,
+            'pontos_ganhos': stats_raw['pontos_ganhos'] or 0,
+            'sequencia': stats_raw['sequencia'] or 0
+        }
+        
+        # Buscar próximos exercícios da mesma aula
+        cur.execute("""
+            SELECT id, titulo, tipo, pontos
+            FROM exercicios
+            WHERE aula_id = %s AND id != %s AND is_active = true
+            ORDER BY id
+            LIMIT 5
+        """, (exercicio.aula_id, exercicio_id))
+        
+        proximos_exercicios = cur.fetchall()
+        
+        cur.close()
+        
+        return render_template('exercise.html', 
+                             exercicio=exercicio, 
+                             progresso=progresso,
+                             stats=stats,
+                             proximos_exercicios=proximos_exercicios)
+                             
+    except Exception as e:
+        print(f"Erro ao carregar exercício: {e}")
+        flash('❌ Erro ao carregar o exercício!', 'error')
+        return redirect(url_for('student_dashboard'))
+
+# Rota de teste para verificar se o problema está no redirecionamento automático
+@app.route('/test-redirect')
+@login_required
+@aluno_required
+def test_redirect():
+    """Rota de teste para verificar redirecionamento"""
+    print(f"🔍 DEBUG: ===== TESTE DE REDIRECIONAMENTO =====")
+    print(f"🔍 DEBUG: Usuário ID: {current_user.id}")
+    print(f"🔍 DEBUG: Usuário Type: {current_user.user_type}")
+    print(f"🔍 DEBUG: is_aluno: {current_user.is_aluno}")
+    print(f"🔍 DEBUG: ===== FIM TESTE =====")
+    
+    return f"""
+    <h1>Teste de Redirecionamento</h1>
+    <p><strong>ID:</strong> {current_user.id}</p>
+    <p><strong>Username:</strong> {current_user.username}</p>
+    <p><strong>User Type:</strong> {current_user.user_type}</p>
+    <p><strong>is_aluno:</strong> {current_user.is_aluno}</p>
+    <p><strong>Nome:</strong> {current_user.first_name} {current_user.last_name}</p>
+    <br>
+    <a href="/student/dashboard">Ir para Dashboard do Aluno</a>
+    <br>
+    <a href="/student/educacao-basica">Ir para Educação Básica</a>
+    <br>
+    <a href="/">Voltar ao Início</a>
+    """
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

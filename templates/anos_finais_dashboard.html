@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Anos Finais - Ensino Fundamental{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header do Dashboard -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h2 mb-1">Anos Finais - Ensino Fundamental 🎓</h1>
+                            <p class="mb-0 opacity-75">6º ao 9º ano - Prepare-se para o Ensino Médio!</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-graduation-cap fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h3 class="mb-0">Fundamental II</h3>
+                                    <small class="opacity-75">Anos Finais</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu de Navegação -->
+    <div class="container-fluid py-3">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-graduation-cap me-2"></i>
+                                Navegação por Nível
+                            </h5>
+                            <a href="{{ url_for('student_dashboard') }}" class="btn btn-light btn-sm">
+                                <i class="fas fa-arrow-left me-2"></i>Voltar ao Dashboard Principal
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <a href="{{ url_for('kids_dashboard') }}"
+                                    class="nav-link p-3 text-center border rounded">
+                                    <i class="fas fa-child fa-2x text-primary mb-2"></i>
+                                    <h6 class="mb-1">Educação Infantil</h6>
+                                    <small class="text-muted">0-5 anos</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('anos_iniciais') }}"
+                                    class="nav-link p-3 text-center border rounded">
+                                    <i class="fas fa-user-graduate fa-2x text-success mb-2"></i>
+                                    <h6 class="mb-1">Anos Iniciais</h6>
+                                    <small class="text-muted">1º ao 5º ano</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('anos_finais') }}"
+                                    class="nav-link active p-3 text-center border rounded bg-warning text-dark">
+                                    <i class="fas fa-graduation-cap fa-2x text-dark mb-2"></i>
+                                    <h6 class="mb-1">Anos Finais</h6>
+                                    <small class="text-dark-50">6º ao 9º ano</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('student_dashboard') }}"
+                                    class="nav-link p-3 text-center border rounded">
+                                    <i class="fas fa-home fa-2x text-info mb-2"></i>
+                                    <h6 class="mb-1">Dashboard Principal</h6>
+                                    <small class="text-muted">Visão Geral</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progresso por Matéria -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Meu Progresso por Matéria
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="progress-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-warning font-weight-bold">Português</span>
+                                    <span class="text-muted">{{ progresso_materias.portugues }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning"
+                                        style="width: {{ progresso_materias.portugues }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="progress-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-warning font-weight-bold">Matemática</span>
+                                    <span class="text-muted">{{ progresso_materias.matematica }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning"
+                                        style="width: {{ progresso_materias.matematica }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="progress-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-warning font-weight-bold">Ciências</span>
+                                    <span class="text-muted">{{ progresso_materias.ciencias }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning"
+                                        style="width: {{ progresso_materias.ciencias }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="progress-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-warning font-weight-bold">História</span>
+                                    <span class="text-muted">{{ progresso_materias.historia }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning"
+                                        style="width: {{ progresso_materias.historia }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="progress-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-warning font-weight-bold">Geografia</span>
+                                    <span class="text-muted">{{ progresso_materias.geografia }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning"
+                                        style="width: {{ progresso_materias.geografia }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="progress-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-warning font-weight-bold">Inglês</span>
+                                    <span class="text-muted">{{ progresso_materias.ingles }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning"
+                                        style="width: {{ progresso_materias.ingles }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="progress-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-warning font-weight-bold">Artes</span>
+                                    <span class="text-muted">{{ progresso_materias.artes }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning" style="width: {{ progresso_materias.artes }}%">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="progress-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-warning font-weight-bold">Educação Física</span>
+                                    <span class="text-muted">{{ progresso_materias.educacao_fisica }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning"
+                                        style="width: {{ progresso_materias.educacao_fisica }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aulas Disponíveis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-book me-2"></i>
+                        Aulas Disponíveis - Anos Finais
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if aulas %}
+                    <div class="row">
+                        {% for aula in aulas %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100 border-warning">
+                                <div class="card-body">
+                                    <h6 class="card-title text-warning">{{ aula.titulo }}</h6>
+                                    <p class="card-text small text-muted">{{ aula.descricao[:80] }}...</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">{{ aula.duracao_minutos }} min</small>
+                                        <span class="badge bg-warning text-dark">{{ aula.serie }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <a href="#" class="btn btn-warning btn-sm w-100">
+                                        <i class="fas fa-play me-2"></i>Iniciar Aula
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Nenhuma aula disponível para os Anos Finais ainda.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conquistas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-trophy me-2"></i>
+                        Minhas Conquistas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for conquista in conquistas %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="conquista-item text-center p-3 border rounded">
+                                <div class="conquista-icon mb-2">
+                                    <span class="display-4">{{ conquista.icone }}</span>
+                                </div>
+                                <h6 class="text-warning mb-1">{{ conquista.nome }}</h6>
+                                <p class="text-muted small mb-0">{{ conquista.descricao }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    }
+
+    .border-warning {
+        border-color: #ffc107 !important;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    .bg-warning {
+        background-color: #ffc107 !important;
+    }
+
+    .progress-item {
+        padding: 10px;
+        border-radius: 8px;
+        background: #f8f9fa;
+    }
+
+    .conquista-item {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        transition: all 0.3s ease;
+    }
+
+    .conquista-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
