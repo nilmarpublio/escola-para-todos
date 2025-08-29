@@ -438,6 +438,61 @@ def admin_editar_usuario(user_id):
     """Editar usuário existente"""
     return render_template('admin_editar_usuario.html', user_id=user_id)
 
+@app.route('/admin/users/create', methods=['GET', 'POST'])
+@admin_required
+def create_user():
+    """Criar novo usuário"""
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user_type = request.form.get('user_type')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        
+        if not all([username, email, password, user_type]):
+            flash('Todos os campos são obrigatórios', 'error')
+            return render_template('admin_criar_usuario.html')
+        
+        db = get_db()
+        if not db:
+            flash('Erro de conexão com o banco de dados', 'error')
+            return render_template('admin_criar_usuario.html')
+        
+        try:
+            # Verificar se usuário já existe
+            cur = db.cursor()
+            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            existing_user = cur.fetchone()
+            
+            if existing_user:
+                flash('Usuário ou email já existe', 'error')
+                cur.close()
+                return render_template('admin_criar_usuario.html')
+            
+            # Criar hash da senha
+            from werkzeug.security import generate_password_hash
+            password_hash = generate_password_hash(password)
+            
+            # Inserir novo usuário
+            cur.execute("""
+                INSERT INTO users (username, email, password_hash, user_type, first_name, last_name, is_active, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, true, NOW(), NOW())
+            """, (username, email, password_hash, user_type, first_name, last_name))
+            
+            db.commit()
+            cur.close()
+            
+            flash('Usuário criado com sucesso!', 'success')
+            return redirect(url_for('admin_dashboard'))
+            
+        except Exception as e:
+            flash(f'Erro ao criar usuário: {e}', 'error')
+            db.rollback()
+            cur.close()
+    
+    return render_template('admin_criar_usuario.html')
+
 # =====================================================
 # ROTAS PROTEGIDAS - PROFESSOR
 # =====================================================
