@@ -426,21 +426,9 @@ def admin_relatorio_turmas():
     """Relatório de turmas"""
     return render_template('admin_relatorio_turmas.html')
 
-@app.route('/admin/criar/usuario')
+@app.route('/admin/criar/usuario', methods=['GET', 'POST'])
 @admin_required
 def admin_criar_usuario():
-    """Criar novo usuário"""
-    return render_template('admin_criar_usuario.html')
-
-@app.route('/admin/editar/usuario/<int:user_id>')
-@admin_required
-def admin_editar_usuario(user_id):
-    """Editar usuário existente"""
-    return render_template('admin_editar_usuario.html', user_id=user_id)
-
-@app.route('/admin/users/create', methods=['GET', 'POST'])
-@admin_required
-def create_user():
     """Criar novo usuário"""
     if request.method == 'POST':
         username = request.form.get('username')
@@ -492,6 +480,14 @@ def create_user():
             cur.close()
     
     return render_template('admin_criar_usuario.html')
+
+@app.route('/admin/editar/usuario/<int:user_id>')
+@admin_required
+def admin_editar_usuario(user_id):
+    """Editar usuário existente"""
+    return render_template('admin_editar_usuario.html', user_id=user_id)
+
+
 
 # =====================================================
 # ROTAS PROTEGIDAS - PROFESSOR
