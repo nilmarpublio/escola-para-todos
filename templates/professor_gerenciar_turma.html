@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Turma - {{ turma.nome }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_aulas') }}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('professor_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Header -->
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div>
+                    <h1 class="h2">
+                        <i class="fas fa-users me-2"></i>{{ turma.nome }}
+                    </h1>
+                    <p class="text-muted mb-0">{{ turma.descricao or 'Sem descrição' }}</p>
+                </div>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ url_for('professor_editar_turma', turma_id=turma.id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i>Editar Turma
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#excluirTurmaModal">
+                            <i class="fas fa-trash me-2"></i>Excluir
+                        </button>
+                    </div>
+                    <a href="{{ url_for('professor_turmas') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Estatísticas da Turma -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center border-primary">
+                        <div class="card-body">
+                            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                            <h4 class="card-title text-primary">{{ stats.total_alunos or 0 }}</h4>
+                            <p class="card-text">Alunos Matriculados</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center border-success">
+                        <div class="card-body">
+                            <i class="fas fa-chalkboard-teacher fa-2x text-success mb-2"></i>
+                            <h4 class="card-title text-success">{{ stats.total_aulas or 0 }}</h4>
+                            <p class="card-text">Total de Aulas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center border-info">
+                        <div class="card-body">
+                            <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                            <h4 class="card-title text-info">{{ "%.1f"|format(stats.media_progresso or 0) }}%</h4>
+                            <p class="card-text">Progresso Médio</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center border-warning">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-alt fa-2x text-warning mb-2"></i>
+                            <h4 class="card-title text-warning">{{ turma.capacidade_maxima or '∞' }}</h4>
+                            <p class="card-text">Capacidade Máxima</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações da Turma -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações da Turma</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>Criada em:</strong> {{ turma.created_at.strftime('%d/%m/%Y') if turma.created_at else 'N/A' }}</li>
+                                <li><strong>Data de início:</strong> {{ turma.data_inicio.strftime('%d/%m/%Y') if turma.data_inicio else 'Não definida' }}</li>
+                                <li><strong>Data de fim:</strong> {{ turma.data_fim.strftime('%d/%m/%Y') if turma.data_fim else 'Não definida' }}</li>
+                                <li><strong>Capacidade:</strong> {{ turma.capacidade_maxima or 'Ilimitada' }} alunos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Ações Rápidas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#adicionarAlunoModal">
+                                    <i class="fas fa-user-plus me-2"></i>Adicionar Aluno
+                                </button>
+                                <a href="#" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-2"></i>Criar Nova Aula
+                                </a>
+                                <a href="#" class="btn btn-outline-info">
+                                    <i class="fas fa-download me-2"></i>Exportar Lista
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alunos Matriculados -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user-graduate me-2"></i>
+                        Alunos Matriculados ({{ alunos|length }})
+                    </h6>
+                    <span class="badge bg-primary">{{ stats.total_alunos or 0 }}/{{ turma.capacidade_maxima or '∞' }}</span>
+                </div>
+                <div class="card-body">
+                    {% if alunos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Data de Matrícula</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for aluno in alunos %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                    {{ aluno.first_name[0] }}{{ aluno.last_name[0] }}
+                                                </div>
+                                                {{ aluno.first_name }} {{ aluno.last_name }}
+                                            </div>
+                                        </td>
+                                        <td><code>{{ aluno.username }}</code></td>
+                                        <td>{{ aluno.email }}</td>
+                                        <td>{{ aluno.data_matricula.strftime('%d/%m/%Y') if aluno.data_matricula else 'N/A' }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if aluno.status == 'ativa' else 'warning' }}">
+                                                {{ aluno.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="#" class="btn btn-outline-info" title="Ver Perfil">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-outline-warning" title="Ver Progresso">
+                                                    <i class="fas fa-chart-line"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-danger" 
+                                                        onclick="removerAluno({{ aluno.id }}, '{{ aluno.first_name }} {{ aluno.last_name }}')"
+                                                        title="Remover da Turma">
+                                                    <i class="fas fa-user-minus"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Nenhum aluno matriculado</h5>
+                            <p class="text-muted">Comece adicionando alunos à turma para começar as aulas.</p>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#adicionarAlunoModal">
+                                <i class="fas fa-user-plus me-2"></i>Adicionar Primeiro Aluno
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Aulas da Turma -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>
+                        Aulas da Turma ({{ aulas|length }})
+                    </h6>
+                    <a href="#" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nova Aula
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if aulas %}
+                        <div class="row">
+                            {% for aula in aulas %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ aula.titulo }}</h6>
+                                        <p class="card-text text-muted">{{ aula.descricao[:100] }}{% if aula.descricao|length > 100 %}...{% endif %}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ aula.created_at.strftime('%d/%m/%Y') if aula.created_at else 'N/A' }}
+                                        </small>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <div class="btn-group btn-group-sm w-100">
+                                            <a href="#" class="btn btn-outline-primary">Ver Aula</a>
+                                            <a href="#" class="btn btn-outline-secondary">Editar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Nenhuma aula criada</h5>
+                            <p class="text-muted">Crie aulas para começar a ensinar esta turma.</p>
+                            <a href="#" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Criar Primeira Aula
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar Aluno -->
+<div class="modal fade" id="adicionarAlunoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>Adicionar Aluno à Turma
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('professor_adicionar_aluno', turma_id=turma.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username do Aluno *</label>
+                        <input type="text" class="form-control" id="username" name="username" required 
+                               placeholder="Digite o username do aluno">
+                        <div class="form-text">O aluno deve ter uma conta ativa no sistema</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Adicionar Aluno
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Excluir Turma -->
+<div class="modal fade" id="excluirTurmaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir a turma <strong>"{{ turma.nome }}"</strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Atenção:</strong> Esta ação não pode ser desfeita e removerá todos os dados da turma.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('professor_excluir_turma', turma_id=turma.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Excluir Turma
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulário para remover aluno -->
+<form id="formRemoverAluno" method="POST" style="display: none;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+<style>
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+    border-radius: 0.375rem;
+    margin: 0.25rem 0.5rem;
+}
+
+.sidebar .nav-link:hover {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.card {
+    border: none;
+    border-radius: 0.35rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+</style>
+
+<script>
+function removerAluno(alunoId, nomeAluno) {
+    if (confirm(`Tem certeza que deseja remover ${nomeAluno} da turma?`)) {
+        const form = document.getElementById('formRemoverAluno');
+        form.action = `/professor/turma/{{ turma.id }}/remover-aluno/${alunoId}`;
+        form.submit();
+    }
+}
+
+// Atualizar estatísticas em tempo real
+function atualizarEstatisticas() {
+    // Aqui você pode implementar atualizações em tempo real via AJAX
+    console.log('Atualizando estatísticas...');
+}
+
+// Atualizar a cada 30 segundos
+setInterval(atualizarEstatisticas, 30000);
+</script>
+{% endblock %}

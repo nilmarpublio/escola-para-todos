@@ -748,12 +748,13 @@ def professor_turmas():
         # Buscar turmas do professor
         professor_id = current_user.id
         cur.execute('''
-            SELECT t.id, t.nome, t.serie, t.created_at,
-                   COALESCE(COUNT(m.aluno_id), 0) as total_alunos
+            SELECT t.id, t.nome, t.descricao, t.created_at,
+                   COALESCE(COUNT(m.aluno_id), 0) as total_alunos,
+                   t.capacidade_maxima
             FROM turmas t
             LEFT JOIN matriculas m ON t.id = m.turma_id
             WHERE t.professor_id = %s 
-            GROUP BY t.id, t.nome, t.serie, t.created_at
+            GROUP BY t.id, t.nome, t.descricao, t.created_at, t.capacidade_maxima
             ORDER BY t.created_at DESC
         ''', (professor_id,))
         turmas = cur.fetchall()
@@ -810,11 +811,290 @@ def professor_relatorio_aluno(aluno_id):
     """Relatório de aluno específico"""
     return render_template('professor_relatorio_aluno.html', aluno_id=aluno_id)
 
-@app.route('/professor/criar/turma')
+# =====================================================
+# ROTAS PARA GESTÃO DE TURMAS
+# =====================================================
+
+@app.route('/professor/criar/turma', methods=['GET', 'POST'])
 @professor_required
 def professor_criar_turma():
     """Criar nova turma"""
+    if request.method == 'POST':
+        try:
+            nome = request.form.get('nome')
+            descricao = request.form.get('descricao')
+            capacidade_maxima = request.form.get('capacidade_maxima')
+            data_inicio = request.form.get('data_inicio')
+            data_fim = request.form.get('data_fim')
+            
+            if not nome:
+                flash('❌ Nome da turma é obrigatório!', 'error')
+                return render_template('professor_criar_turma.html')
+            
+            db = get_db()
+            cur = db.cursor()
+            
+            # Criar turma
+            cur.execute("""
+                INSERT INTO turmas (nome, descricao, professor_id, capacidade_maxima, data_inicio, data_fim, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
+                RETURNING id
+            """, (nome, descricao, current_user.id, capacidade_maxima, data_inicio, data_fim))
+            
+            turma_id = cur.fetchone()['id']
+            db.commit()
+            cur.close()
+            
+            flash(f'✅ Turma "{nome}" criada com sucesso!', 'success')
+            return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+            
+        except Exception as e:
+            print(f"❌ Erro ao criar turma: {e}")
+            flash('❌ Erro ao criar turma!', 'error')
+    
     return render_template('professor_criar_turma.html')
+
+@app.route('/professor/turma/<int:turma_id>/gerenciar')
+@professor_required
+def professor_gerenciar_turma(turma_id):
+    """Gerenciar turma específica"""
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Verificar se a turma pertence ao professor
+        cur.execute("""
+            SELECT id, nome, descricao, capacidade_maxima, data_inicio, data_fim, created_at
+            FROM turmas 
+            WHERE id = %s AND professor_id = %s
+        """, (turma_id, current_user.id))
+        
+        turma = cur.fetchone()
+        if not turma:
+            flash('❌ Turma não encontrada!', 'error')
+            return redirect(url_for('professor_turmas'))
+        
+        # Buscar alunos matriculados
+        cur.execute("""
+            SELECT u.id, u.username, u.first_name, u.last_name, u.email, m.data_matricula, m.status
+            FROM matriculas m
+            JOIN users u ON m.aluno_id = u.id
+            WHERE m.turma_id = %s
+            ORDER BY u.first_name, u.last_name
+        """, (turma_id,))
+        
+        alunos = cur.fetchall()
+        
+        # Buscar aulas da turma
+        cur.execute("""
+            SELECT id, titulo, descricao, created_at
+            FROM aulas
+            WHERE turma_id = %s AND is_active = true
+            ORDER BY created_at
+        """, (turma_id,))
+        
+        aulas = cur.fetchall()
+        
+        # Estatísticas da turma
+        cur.execute("""
+            SELECT 
+                COUNT(DISTINCT m.aluno_id) as total_alunos,
+                COUNT(DISTINCT a.id) as total_aulas,
+                AVG(pa.progresso) as media_progresso
+            FROM turmas t
+            LEFT JOIN matriculas m ON t.id = m.turma_id
+            LEFT JOIN aulas a ON t.id = a.turma_id
+            LEFT JOIN progresso_alunos pa ON a.id = pa.aula_id
+            WHERE t.id = %s
+        """, (turma_id,))
+        
+        stats = cur.fetchone()
+        cur.close()
+        
+        return render_template('professor_gerenciar_turma.html', 
+                             turma=turma, 
+                             alunos=alunos, 
+                             aulas=aulas, 
+                             stats=stats)
+        
+    except Exception as e:
+        print(f"❌ Erro ao gerenciar turma: {e}")
+        flash('❌ Erro ao carregar dados da turma!', 'error')
+        return redirect(url_for('professor_turmas'))
+
+@app.route('/professor/turma/<int:turma_id>/adicionar-aluno', methods=['POST'])
+@professor_required
+def professor_adicionar_aluno(turma_id):
+    """Adicionar aluno à turma"""
+    try:
+        username = request.form.get('username')
+        if not username:
+            flash('❌ Username é obrigatório!', 'error')
+            return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+        
+        db = get_db()
+        cur = db.cursor()
+        
+        # Verificar se a turma pertence ao professor
+        cur.execute("SELECT id FROM turmas WHERE id = %s AND professor_id = %s", (turma_id, current_user.id))
+        if not cur.fetchone():
+            flash('❌ Acesso negado!', 'error')
+            return redirect(url_for('professor_turmas'))
+        
+        # Buscar aluno pelo username
+        cur.execute("SELECT id, username, first_name, last_name FROM users WHERE username = %s AND user_type = 'aluno'", (username,))
+        aluno = cur.fetchone()
+        
+        if not aluno:
+            flash('❌ Aluno não encontrado!', 'error')
+            return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+        
+        # Verificar se já está matriculado
+        cur.execute("SELECT id FROM matriculas WHERE turma_id = %s AND aluno_id = %s", (turma_id, aluno['id']))
+        if cur.fetchone():
+            flash(f'❌ {aluno["username"]} já está matriculado nesta turma!', 'error')
+            return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+        
+        # Matricular aluno
+        cur.execute("""
+            INSERT INTO matriculas (turma_id, aluno_id, data_matricula, status, created_at, updated_at)
+            VALUES (%s, %s, NOW(), 'ativa', NOW(), NOW())
+        """, (turma_id, aluno['id']))
+        
+        db.commit()
+        cur.close()
+        
+        flash(f'✅ {aluno["first_name"]} {aluno["last_name"]} matriculado com sucesso!', 'success')
+        
+    except Exception as e:
+        print(f"❌ Erro ao adicionar aluno: {e}")
+        flash('❌ Erro ao matricular aluno!', 'error')
+    
+    return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+
+@app.route('/professor/turma/<int:turma_id>/remover-aluno/<int:aluno_id>', methods=['POST'])
+@professor_required
+def professor_remover_aluno(turma_id, aluno_id):
+    """Remover aluno da turma"""
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Verificar se a turma pertence ao professor
+        cur.execute("SELECT id FROM turmas WHERE id = %s AND professor_id = %s", (turma_id, current_user.id))
+        if not cur.fetchone():
+            flash('❌ Acesso negado!', 'error')
+            return redirect(url_for('professor_turmas'))
+        
+        # Buscar dados do aluno
+        cur.execute("SELECT username, first_name, last_name FROM users WHERE id = %s", (aluno_id,))
+        aluno = cur.fetchone()
+        
+        if not aluno:
+            flash('❌ Aluno não encontrado!', 'error')
+            return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+        
+        # Remover matrícula
+        cur.execute("DELETE FROM matriculas WHERE turma_id = %s AND aluno_id = %s", (turma_id, aluno_id))
+        
+        db.commit()
+        cur.close()
+        
+        flash(f'✅ {aluno["first_name"]} {aluno["last_name"]} removido da turma!', 'success')
+        
+    except Exception as e:
+        print(f"❌ Erro ao remover aluno: {e}")
+        flash('❌ Erro ao remover aluno!', 'error')
+    
+    return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+
+@app.route('/professor/turma/<int:turma_id>/editar', methods=['GET', 'POST'])
+@professor_required
+def professor_editar_turma(turma_id):
+    """Editar turma existente"""
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Verificar se a turma pertence ao professor
+        cur.execute("""
+            SELECT id, nome, descricao, capacidade_maxima, data_inicio, data_fim
+            FROM turmas 
+            WHERE id = %s AND professor_id = %s
+        """, (turma_id, current_user.id))
+        
+        turma = cur.fetchone()
+        if not turma:
+            flash('❌ Turma não encontrada!', 'error')
+            return redirect(url_for('professor_turmas'))
+        
+        if request.method == 'POST':
+            nome = request.form.get('nome')
+            descricao = request.form.get('descricao')
+            capacidade_maxima = request.form.get('capacidade_maxima')
+            data_inicio = request.form.get('data_inicio')
+            data_fim = request.form.get('data_fim')
+            
+            if not nome:
+                flash('❌ Nome da turma é obrigatório!', 'error')
+                return render_template('professor_editar_turma.html', turma=turma)
+            
+            # Atualizar turma
+            cur.execute("""
+                UPDATE turmas 
+                SET nome = %s, descricao = %s, capacidade_maxima = %s, data_inicio = %s, data_fim = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (nome, descricao, capacidade_maxima, data_inicio, data_fim, turma_id))
+            
+            db.commit()
+            cur.close()
+            
+            flash('✅ Turma atualizada com sucesso!', 'success')
+            return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+        
+        cur.close()
+        return render_template('professor_editar_turma.html', turma=turma)
+        
+    except Exception as e:
+        print(f"❌ Erro ao editar turma: {e}")
+        flash('❌ Erro ao carregar dados da turma!', 'error')
+        return redirect(url_for('professor_turmas'))
+
+@app.route('/professor/turma/<int:turma_id>/excluir', methods=['POST'])
+@professor_required
+def professor_excluir_turma(turma_id):
+    """Excluir turma"""
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        # Verificar se a turma pertence ao professor
+        cur.execute("SELECT nome FROM turmas WHERE id = %s AND professor_id = %s", (turma_id, current_user.id))
+        turma = cur.fetchone()
+        
+        if not turma:
+            flash('❌ Acesso negado!', 'error')
+            return redirect(url_for('professor_turmas'))
+        
+        # Verificar se há alunos matriculados
+        cur.execute("SELECT COUNT(*) FROM matriculas WHERE turma_id = %s", (turma_id,))
+        if cur.fetchone()['count'] > 0:
+            flash('❌ Não é possível excluir uma turma com alunos matriculados!', 'error')
+            return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
+        
+        # Excluir turma
+        cur.execute("DELETE FROM turmas WHERE id = %s", (turma_id,))
+        
+        db.commit()
+        cur.close()
+        
+        flash(f'✅ Turma "{turma["nome"]}" excluída com sucesso!', 'success')
+        return redirect(url_for('professor_turmas'))
+        
+    except Exception as e:
+        print(f"❌ Erro ao excluir turma: {e}")
+        flash('❌ Erro ao excluir turma!', 'error')
+        return redirect(url_for('professor_gerenciar_turma', turma_id=turma_id))
 
 @app.route('/professor/criar/aula')
 @professor_required

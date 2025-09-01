@@ -71,8 +71,8 @@
                             <div class="row text-center mb-3">
                                 <div class="col-6">
                                     <div class="border-end">
-                                        <h5 class="text-primary mb-0">{{ turma.serie }}</h5>
-                                        <small class="text-muted">Série</small>
+                                        <h5 class="text-primary mb-0">{{ turma.total_alunos }}</h5>
+                                        <small class="text-muted">Alunos</small>
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -83,17 +83,19 @@
                                 </div>
                             </div>
 
+                            {% if turma.descricao %}
+                            <p class="text-muted small mb-3">{{ turma.descricao[:80] }}{% if turma.descricao|length > 80 %}...{% endif %}</p>
+                            {% endif %}
+
                             <div class="d-grid gap-2">
-                                <!-- Funcionalidade de detalhes da turma será implementada posteriormente -->
-                                <button class="btn btn-outline-primary btn-sm" title="Ver Detalhes (em desenvolvimento)"
-                                    disabled>
-                                    <i class="fas fa-eye me-2"></i>Ver Detalhes
-                                </button>
-                                <!-- Funcionalidade de relatório da turma será implementada posteriormente -->
-                                <button class="btn btn-outline-info btn-sm" title="Relatório (em desenvolvimento)"
-                                    disabled>
-                                    <i class="fas fa-chart-bar me-2"></i>Relatório
-                                </button>
+                                <a href="{{ url_for('professor_gerenciar_turma', turma_id=turma.id) }}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-cog me-2"></i>Gerenciar Turma
+                                </a>
+                                <a href="{{ url_for('professor_editar_turma', turma_id=turma.id) }}" 
+                                   class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-edit me-2"></i>Editar
+                                </a>
                             </div>
                         </div>
                     </div>

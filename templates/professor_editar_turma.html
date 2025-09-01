@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Criar Nova Turma{% endblock %}
+{% block title %}Editar Turma - {{ turma.nome }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8 mx-auto">
             <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-warning text-dark">
                     <h4 class="mb-0">
-                        <i class="fas fa-plus-circle me-2"></i>
-                        Criar Nova Turma
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Turma: {{ turma.nome }}
                     </h4>
                 </div>
                 <div class="card-body">
@@ -24,6 +24,7 @@
                                    class="form-control" 
                                    id="nome" 
                                    name="nome" 
+                                   value="{{ turma.nome }}"
                                    required 
                                    placeholder="Ex: Matemática 6º Ano A">
                             <div class="form-text">Nome único e descritivo para identificar a turma</div>
@@ -38,7 +39,7 @@
                                       id="descricao" 
                                       name="descricao" 
                                       rows="3" 
-                                      placeholder="Descreva o objetivo e conteúdo da turma"></textarea>
+                                      placeholder="Descreva o objetivo e conteúdo da turma">{{ turma.descricao or '' }}</textarea>
                         </div>
 
                         <div class="row">
@@ -52,6 +53,7 @@
                                            class="form-control" 
                                            id="capacidade_maxima" 
                                            name="capacidade_maxima" 
+                                           value="{{ turma.capacidade_maxima or '' }}"
                                            min="1" 
                                            max="100" 
                                            placeholder="Ex: 30">
@@ -67,7 +69,8 @@
                                     <input type="date" 
                                            class="form-control" 
                                            id="data_inicio" 
-                                           name="data_inicio">
+                                           name="data_inicio"
+                                           value="{{ turma.data_inicio.strftime('%Y-%m-%d') if turma.data_inicio else '' }}">
                                 </div>
                             </div>
                         </div>
@@ -80,39 +83,70 @@
                             <input type="date" 
                                    class="form-control" 
                                    id="data_fim" 
-                                   name="data_fim">
+                                   name="data_fim"
+                                   value="{{ turma.data_fim.strftime('%Y-%m-%d') if turma.data_fim else '' }}">
                             <div class="form-text">Data prevista para conclusão da turma</div>
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('professor_turmas') }}" class="btn btn-secondary me-md-2">
+                            <a href="{{ url_for('professor_gerenciar_turma', turma_id=turma.id) }}" class="btn btn-secondary me-md-2">
                                 <i class="fas fa-arrow-left me-2"></i>
                                 Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-warning">
                                 <i class="fas fa-save me-2"></i>
-                                Criar Turma
+                                Atualizar Turma
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Dicas para criar uma boa turma -->
+            <!-- Informações da Turma -->
             <div class="card mt-4 border-info">
                 <div class="card-header bg-info text-white">
                     <h6 class="mb-0">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        Dicas para criar uma boa turma
+                        <i class="fas fa-info-circle me-2"></i>
+                        Informações Atuais da Turma
                     </h6>
                 </div>
                 <div class="card-body">
-                    <ul class="mb-0">
-                        <li><strong>Nome claro:</strong> Use nomes que identifiquem facilmente o conteúdo e nível</li>
-                        <li><strong>Descrição detalhada:</strong> Explique o que os alunos aprenderão</li>
-                        <li><strong>Capacidade adequada:</strong> Considere o tempo disponível para dar atenção individual</li>
-                        <li><strong>Datas realistas:</strong> Defina prazos que permitam um aprendizado efetivo</li>
-                    </ul>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>ID da Turma:</strong> {{ turma.id }}</li>
+                                <li><strong>Nome Atual:</strong> {{ turma.nome }}</li>
+                                <li><strong>Descrição:</strong> {{ turma.descricao or 'Não definida' }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>Capacidade:</strong> {{ turma.capacidade_maxima or 'Ilimitada' }} alunos</li>
+                                <li><strong>Data Início:</strong> {{ turma.data_inicio.strftime('%d/%m/%Y') if turma.data_inicio else 'Não definida' }}</li>
+                                <li><strong>Data Fim:</strong> {{ turma.data_fim.strftime('%d/%m/%Y') if turma.data_fim else 'Não definida' }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avisos Importantes -->
+            <div class="card mt-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Avisos Importantes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-0">
+                        <ul class="mb-0">
+                            <li><strong>Alterar o nome da turma</strong> pode afetar como os alunos a identificam</li>
+                            <li><strong>Reduzir a capacidade máxima</strong> pode impedir novos alunos de se matricularem</li>
+                            <li><strong>Alterar datas</strong> pode afetar o planejamento das aulas</li>
+                            <li>As alterações são aplicadas imediatamente após salvar</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -137,6 +171,18 @@ document.querySelector('form').addEventListener('submit', function(e) {
         alert('A data de início não pode ser posterior à data de fim');
         return;
     }
+    
+    // Confirmação antes de salvar
+    if (!confirm('Tem certeza que deseja salvar as alterações na turma?')) {
+        e.preventDefault();
+        return;
+    }
+});
+
+// Atualizar preview em tempo real
+document.getElementById('nome').addEventListener('input', function() {
+    const nome = this.value || 'Nome da Turma';
+    document.title = `Editar Turma - ${nome}`;
 });
 </script>
 {% endblock %}
