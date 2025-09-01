@@ -1754,6 +1754,117 @@ def test_redirect():
     <a href="/">Voltar ao Início</a>
     """
 
+# =====================================================
+# ROTAS PARA IA DE RECOMENDAÇÃO
+# =====================================================
+
+try:
+    from services.ai_recommendation_service import get_recommendations_for_student, get_learning_insights_for_student
+    AI_SERVICE_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ Serviço de IA não disponível: {e}")
+    AI_SERVICE_AVAILABLE = False
+
+@app.route('/api/ai/recommendations/<int:aluno_id>')
+@login_required
+@aluno_required
+def get_ai_recommendations(aluno_id):
+    """API para obter recomendações personalizadas de IA"""
+    if not AI_SERVICE_AVAILABLE:
+        return jsonify({'success': False, 'error': 'Serviço de IA não disponível'}), 503
+    
+    try:
+        # Verificar se o aluno está acessando seus próprios dados
+        if current_user.id != aluno_id:
+            return jsonify({'success': False, 'error': 'Acesso negado'}), 403
+        
+        recommendations = get_recommendations_for_student(aluno_id, limit=10)
+        
+        # Converter para formato JSON
+        recommendations_data = []
+        for rec in recommendations:
+            recommendations_data.append({
+                'aula_id': rec.aula_id,
+                'titulo': rec.titulo,
+                'descricao': rec.descricao,
+                'dificuldade': rec.dificuldade,
+                'pontuacao': rec.pontuacao,
+                'razao': rec.razao,
+                'ordem': rec.ordem
+            })
+        
+        return jsonify({
+            'success': True, 
+            'recommendations': recommendations_data
+        })
+        
+    except Exception as e:
+        print(f"Erro ao obter recomendações de IA: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/ai/insights/<int:aluno_id>')
+@login_required
+@aluno_required
+def get_ai_insights(aluno_id):
+    """API para obter insights de aprendizado de IA"""
+    if not AI_SERVICE_AVAILABLE:
+        return jsonify({'success': False, 'error': 'Serviço de IA não disponível'}), 503
+    
+    try:
+        # Verificar se o aluno está acessando seus próprios dados
+        if current_user.id != aluno_id:
+            return jsonify({'success': False, 'error': 'Acesso negado'}), 403
+        
+        insights = get_learning_insights_for_student(aluno_id)
+        
+        return jsonify({
+            'success': True, 
+            'insights': insights
+        })
+        
+    except Exception as e:
+        print(f"Erro ao obter insights de IA: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/ai/learning-path/<int:aluno_id>')
+@login_required
+@aluno_required
+def get_adaptive_learning_path(aluno_id):
+    """API para obter caminho de aprendizado adaptativo"""
+    if not AI_SERVICE_AVAILABLE:
+        return jsonify({'success': False, 'error': 'Serviço de IA não disponível'}), 503
+    
+    try:
+        # Verificar se o aluno está acessando seus próprios dados
+        if current_user.id != aluno_id:
+            return jsonify({'success': False, 'error': 'Acesso negado'}), 403
+        
+        from services.ai_recommendation_service import AIRecommendationService
+        service = AIRecommendationService()
+        learning_path = service.get_adaptive_learning_path(aluno_id)
+        
+        # Converter para formato JSON
+        path_data = []
+        for item in learning_path:
+            path_data.append({
+                'aula_id': item.aula_id,
+                'titulo': item.titulo,
+                'descricao': item.descricao,
+                'dificuldade': item.dificuldade,
+                'pontuacao': item.pontuacao,
+                'razao': item.razao,
+                'ordem': item.ordem
+            })
+        
+        return jsonify({
+            'success': True, 
+            'learning_path': path_data
+        })
+        
+    except Exception as e:
+        print(f"Erro ao obter caminho de aprendizado: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 if __name__ == '__main__':
     # Criar usuários padrão na primeira execução
     with app.app_context():
