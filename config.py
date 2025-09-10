@@ -9,7 +9,7 @@ class Config:
     DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     
     # Configurações de banco de dados
-    DATABASE = 'escola_para_todos.db'
+    DATABASE = 'educa_facil.db'
     
     # Configurações de sessão
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)  # Sessão expira em 24 horas
@@ -80,7 +80,7 @@ class ProductionConfig(Config):
                 app.logger.addHandler(file_handler)
             
             app.logger.setLevel(logging.INFO)
-            app.logger.info('Escola para Todos startup')
+            app.logger.info('Educa Fácil startup')
 
 class TestingConfig(Config):
     """Configurações para testes"""

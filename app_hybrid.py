@@ -227,7 +227,7 @@ def health():
 def version():
     """Versão da aplicação"""
     return {
-        'app': 'Escola para Todos',
+        'app': 'Educa Fácil',
         'version': '2.0.0',
         'database': 'Hybrid (SQLite/PostgreSQL)',
         'environment': os.getenv('FLASK_ENV', 'development')
@@ -261,7 +261,7 @@ if __name__ == '__main__':
         init_db.init_database()
         print("✅ Banco SQLite criado com sucesso!")
     
-    print("🚀 Iniciando Escola para Todos (Modo Híbrido)")
+    print("🚀 Iniciando Educa Fácil (Modo Híbrido)")
     print("📊 Banco: SQLite (local) / PostgreSQL (Render)")
     print("🌍 Ambiente:", os.getenv('FLASK_ENV', 'development'))
     

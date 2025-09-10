@@ -2,7 +2,7 @@
 set -e  # Parar se houver erro
 
 echo "🚀 =========================================="
-echo "🚀 INICIANDO ESCOLA PARA TODOS NO RENDER"
+echo "🚀 INICIANDO EDUCA FÁCIL NO RENDER"
 echo "🚀 =========================================="
 echo "📁 Diretório atual: $(pwd)"
 echo "📋 Arquivos disponíveis:"

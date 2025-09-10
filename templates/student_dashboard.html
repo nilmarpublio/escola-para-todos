@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard do Aluno - Escola para Todos{% endblock %}
+{% block title %}Dashboard do Aluno - Educa Fácil{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -120,55 +120,55 @@
                 </div>
                 <div class="card-body">
                     {% if data.aulas_disponiveis %}
-                        <div class="row">
-                            {% for aula in data.aulas_disponiveis %}
-                            <div class="col-md-6 mb-3">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h6 class="card-title mb-0">{{ aula.titulo }}</h6>
-                                            <span class="badge bg-primary">{{ aula.duracao_minutos }}min</span>
-                                        </div>
-                                        <p class="card-text text-muted small">{{ aula.descricao[:80] }}...</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <small class="text-muted">{{ aula.turma_nome }}</small>
-                                            <div>
-                                                {% if aula.progresso_status == 'concluida' %}
-                                                    <span class="badge bg-success">✓ Concluída</span>
-                                                {% elif aula.progresso_status == 'em_progresso' %}
-                                                    <span class="badge bg-info">⟳ Em Progresso</span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary">⏸ Não Iniciada</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
+                    <div class="row">
+                        {% for aula in data.aulas_disponiveis %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">{{ aula.titulo }}</h6>
+                                        <span class="badge bg-primary">{{ aula.duracao_minutos }}min</span>
                                     </div>
-                                    <div class="card-footer bg-transparent border-0">
-                                        <a href="{{ url_for('ver_aula', aula_id=aula.id) }}" 
-                                           class="btn btn-primary btn-sm w-100">
+                                    <p class="card-text text-muted small">{{ aula.descricao[:80] }}...</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">{{ aula.turma_nome }}</small>
+                                        <div>
                                             {% if aula.progresso_status == 'concluida' %}
-                                                <i class="fas fa-redo me-1"></i>Revisar
+                                            <span class="badge bg-success">✓ Concluída</span>
                                             {% elif aula.progresso_status == 'em_progresso' %}
-                                                <i class="fas fa-play me-1"></i>Continuar
+                                            <span class="badge bg-info">⟳ Em Progresso</span>
                                             {% else %}
-                                                <i class="fas fa-play me-1"></i>Iniciar
+                                            <span class="badge bg-secondary">⏸ Não Iniciada</span>
                                             {% endif %}
-                                        </a>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="card-footer bg-transparent border-0">
+                                    <a href="{{ url_for('ver_aula', aula_id=aula.id) }}"
+                                        class="btn btn-primary btn-sm w-100">
+                                        {% if aula.progresso_status == 'concluida' %}
+                                        <i class="fas fa-redo me-1"></i>Revisar
+                                        {% elif aula.progresso_status == 'em_progresso' %}
+                                        <i class="fas fa-play me-1"></i>Continuar
+                                        {% else %}
+                                        <i class="fas fa-play me-1"></i>Iniciar
+                                        {% endif %}
+                                    </a>
+                                </div>
                             </div>
-                            {% endfor %}
                         </div>
+                        {% endfor %}
+                    </div>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-book fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Nenhuma aula disponível</h5>
-                            <p class="text-muted">Você ainda não está matriculado em nenhuma turma.</p>
-                            <a href="{{ url_for('student_turmas') }}" class="btn btn-primary">
-                                <i class="fas fa-search me-2"></i>
-                                Procurar Turmas
-                            </a>
-                        </div>
+                    <div class="text-center py-4">
+                        <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhuma aula disponível</h5>
+                        <p class="text-muted">Você ainda não está matriculado em nenhuma turma.</p>
+                        <a href="{{ url_for('student_turmas') }}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>
+                            Procurar Turmas
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -186,26 +186,26 @@
                 </div>
                 <div class="card-body">
                     {% if data.turmas_matriculadas %}
-                        {% for turma in data.turmas_matriculadas %}
-                        <div class="turma-item mb-3 p-3 border rounded">
-                            <h6 class="fw-bold mb-2">{{ turma.nome }}</h6>
-                            <p class="text-muted small mb-2">{{ turma.descricao[:60] }}...</p>
-                            <div class="progress mb-2" style="height: 8px;">
-                                {% set percentual = (turma.aulas_concluidas / turma.total_aulas * 100) if turma.total_aulas > 0 else 0 %}
-                                <div class="progress-bar bg-success" 
-                                     style="width: {{ percentual }}%"></div>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">{{ turma.aulas_concluidas }}/{{ turma.total_aulas }} aulas</small>
-                                <small class="text-muted">{{ "%.0f"|format(percentual) }}%</small>
-                            </div>
+                    {% for turma in data.turmas_matriculadas %}
+                    <div class="turma-item mb-3 p-3 border rounded">
+                        <h6 class="fw-bold mb-2">{{ turma.nome }}</h6>
+                        <p class="text-muted small mb-2">{{ turma.descricao[:60] }}...</p>
+                        <div class="progress mb-2" style="height: 8px;">
+                            {% set percentual = (turma.aulas_concluidas / turma.total_aulas * 100) if turma.total_aulas
+                            > 0 else 0 %}
+                            <div class="progress-bar bg-success" style="width: {{ percentual }}%"></div>
                         </div>
-                        {% endfor %}
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">{{ turma.aulas_concluidas }}/{{ turma.total_aulas }} aulas</small>
+                            <small class="text-muted">{{ "%.0f"|format(percentual) }}%</small>
+                        </div>
+                    </div>
+                    {% endfor %}
                     {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-users fa-2x text-muted mb-2"></i>
-                            <p class="text-muted small mb-0">Nenhuma turma matriculada</p>
-                        </div>
+                    <div class="text-center py-3">
+                        <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">Nenhuma turma matriculada</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -240,48 +240,48 @@
 </div>
 
 <style>
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-}
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
 
-.border-left-primary {
-    border-left: 0.25rem solid #007bff !important;
-}
+    .border-left-primary {
+        border-left: 0.25rem solid #007bff !important;
+    }
 
-.border-left-success {
-    border-left: 0.25rem solid #28a745 !important;
-}
+    .border-left-success {
+        border-left: 0.25rem solid #28a745 !important;
+    }
 
-.border-left-info {
-    border-left: 0.25rem solid #17a2b8 !important;
-}
+    .border-left-info {
+        border-left: 0.25rem solid #17a2b8 !important;
+    }
 
-.border-left-warning {
-    border-left: 0.25rem solid #ffc107 !important;
-}
+    .border-left-warning {
+        border-left: 0.25rem solid #ffc107 !important;
+    }
 
-.turma-item {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    transition: all 0.3s ease;
-}
+    .turma-item {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        transition: all 0.3s ease;
+    }
 
-.turma-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+    .turma-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-.card {
-    transition: all 0.3s ease;
-}
+    .card {
+        transition: all 0.3s ease;
+    }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
 
-.progress {
-    border-radius: 10px;
-    overflow: hidden;
-}
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
 </style>
 {% endblock %}

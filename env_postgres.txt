@@ -1,4 +1,4 @@
-# Configurações para PostgreSQL - Escola para Todos
+# Configurações para PostgreSQL - Educa Fácil
 # Copie este arquivo para .env e ajuste os valores
 
 # Configurações da Aplicação

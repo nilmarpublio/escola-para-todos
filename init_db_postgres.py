@@ -272,7 +272,7 @@ def insert_initial_data(db):
             INSERT INTO users (username, email, password_hash, first_name, last_name, user_type, is_active, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
-        ''', ('admin', 'admin@escola-para-todos.com', admin_password, 'Administrador', 'Sistema', 'admin', True, now, now))
+        ''', ('admin', 'admin@educa-facil.com', admin_password, 'Administrador', 'Sistema', 'admin', True, now, now))
         
         admin_id = cur.fetchone()['id']
         
@@ -300,7 +300,7 @@ def insert_initial_data(db):
         print("✅ Usuário administrador criado!")
         print("   Username: admin")
         print("   Senha: admin123")
-        print("   Email: admin@escola-para-todos.com")
+        print("   Email: admin@educa-facil.com")
     
     # Inserir tags básicas do fórum
     tags = [

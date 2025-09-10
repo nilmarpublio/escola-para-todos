@@ -9,7 +9,7 @@ import sys
 
 def main():
     """Função principal que executa o startCommand"""
-    print("🚀 Iniciando Escola para Todos via startCommand...")
+    print("🚀 Iniciando Educa Fácil via startCommand...")
     
     # Verificar se estamos no Render
     if os.getenv('RENDER'):
