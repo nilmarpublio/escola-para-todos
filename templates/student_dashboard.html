@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard do Aluno - Educa Fácil{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header do Dashboard -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h2 mb-1">Bem-vindo, {{ current_user.first_name }}! 👋</h1>
+                            <p class="mb-0 opacity-75">Continue sua jornada de aprendizado</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-star fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h3 class="mb-0">{{ data.nivel_atual }}</h3>
+                                    <small class="opacity-75">Nível Atual</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total de Aulas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.total_aulas }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-book fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Aulas Concluídas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.aulas_concluidas }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Em Progresso
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.aulas_em_progresso }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-spinner fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total de Pontos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.total_pontos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-trophy fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Aulas Disponíveis -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-play-circle me-2"></i>
+                        Aulas Disponíveis
+                    </h6>
+                    <a href="{{ url_for('student_turmas') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-list me-1"></i>
+                        Ver Todas as Turmas
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if data.aulas_disponiveis %}
+                    <div class="row">
+                        {% for aula in data.aulas_disponiveis %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">{{ aula.titulo }}</h6>
+                                        <span class="badge bg-primary">{{ aula.duracao_minutos }}min</span>
+                                    </div>
+                                    <p class="card-text text-muted small">{{ aula.descricao[:80] }}...</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">{{ aula.turma_nome }}</small>
+                                        <div>
+                                            {% if aula.progresso_status == 'concluida' %}
+                                            <span class="badge bg-success">✓ Concluída</span>
+                                            {% elif aula.progresso_status == 'em_progresso' %}
+                                            <span class="badge bg-info">⟳ Em Progresso</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">⏸ Não Iniciada</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-0">
+                                    <a href="{{ url_for('ver_aula', aula_id=aula.id) }}"
+                                        class="btn btn-primary btn-sm w-100">
+                                        {% if aula.progresso_status == 'concluida' %}
+                                        <i class="fas fa-redo me-1"></i>Revisar
+                                        {% elif aula.progresso_status == 'em_progresso' %}
+                                        <i class="fas fa-play me-1"></i>Continuar
+                                        {% else %}
+                                        <i class="fas fa-play me-1"></i>Iniciar
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhuma aula disponível</h5>
+                        <p class="text-muted">Você ainda não está matriculado em nenhuma turma.</p>
+                        <a href="{{ url_for('student_turmas') }}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>
+                            Procurar Turmas
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Turmas Matriculadas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-users me-2"></i>
+                        Minhas Turmas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if data.turmas_matriculadas %}
+                    {% for turma in data.turmas_matriculadas %}
+                    <div class="turma-item mb-3 p-3 border rounded">
+                        <h6 class="fw-bold mb-2">{{ turma.nome }}</h6>
+                        <p class="text-muted small mb-2">{{ turma.descricao[:60] }}...</p>
+                        <div class="progress mb-2" style="height: 8px;">
+                            {% set percentual = (turma.aulas_concluidas / turma.total_aulas * 100) if turma.total_aulas
+                            > 0 else 0 %}
+                            <div class="progress-bar bg-success" style="width: {{ percentual }}%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">{{ turma.aulas_concluidas }}/{{ turma.total_aulas }} aulas</small>
+                            <small class="text-muted">{{ "%.0f"|format(percentual) }}%</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">Nenhuma turma matriculada</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Ações Rápidas -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt me-2"></i>
+                        Ações Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('student_progresso') }}" class="btn btn-outline-info">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Meu Progresso
+                        </a>
+                        <a href="{{ url_for('student_gamificacao') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-trophy me-2"></i>
+                            Gamificação
+                        </a>
+                        <a href="{{ url_for('student_ranking') }}" class="btn btn-outline-success">
+                            <i class="fas fa-medal me-2"></i>
+                            Ranking
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+
+    .border-left-primary {
+        border-left: 0.25rem solid #007bff !important;
+    }
+
+    .border-left-success {
+        border-left: 0.25rem solid #28a745 !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #17a2b8 !important;
+    }
+
+    .border-left-warning {
+        border-left: 0.25rem solid #ffc107 !important;
+    }
+
+    .turma-item {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        transition: all 0.3s ease;
+    }
+
+    .turma-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

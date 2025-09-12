@@ -13,7 +13,7 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
     config={
-        'app_name': "Escola para Todos - API"
+        'app_name': "Aqui se Ensina - API"
     }
 )
 
@@ -21,8 +21,8 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
 openapi_spec = {
     "openapi": "3.0.0",
     "info": {
-        "title": "Escola para Todos API",
-        "description": "API REST para o sistema de educação Escola para Todos",
+        "title": "Aqui se Ensina API",
+        "description": "API REST para o sistema de educação Aqui se Ensina",
         "version": "1.0.0",
         "contact": {
             "name": "Equipe de Desenvolvimento",

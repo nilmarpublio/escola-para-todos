@@ -1,4 +1,4 @@
-# 🚀 Guia de Deploy - Escola para Todos
+# 🚀 Guia de Deploy - Aqui se Ensina
 
 Este documento contém instruções para fazer deploy da aplicação no Render.
 
@@ -33,10 +33,10 @@ git push origin main
 1. Clique em **"New +"**
 2. Selecione **"Web Service"**
 3. Conecte seu repositório Git
-4. Selecione o repositório `escola-para-todos`
+4. Selecione o repositório `aqui-se-ensina`
 
 ### **2.3 Configurar Serviço**
-- **Name**: `escola-para-todos`
+- **Name**: `aqui-se-ensina`
 - **Environment**: `Python 3`
 - **Build Command**: `pip install -r requirements.txt`
 - **Start Command**: `python app.py`
@@ -53,7 +53,7 @@ FLASK_DEBUG=0
 ### **2.5 Deploy**
 1. Clique em **"Create Web Service"**
 2. Aguarde o build e deploy
-3. Anote a URL gerada (ex: `https://escola-para-todos.onrender.com`)
+3. Anote a URL gerada (ex: `https://aqui-se-ensina.onrender.com`)
 
 ## 🔄 **3. Atualizar URL Existente**
 
@@ -64,8 +64,8 @@ FLASK_DEBUG=0
 4. Confirme a exclusão
 
 ### **3.2 Configurar Novo Serviço**
-1. Use o mesmo nome: `escola-para-todos`
-2. O Render manterá a URL: `https://escola-para-todos.onrender.com`
+1. Use o mesmo nome: `aqui-se-ensina`
+2. O Render manterá a URL: `https://aqui-se-ensina.onrender.com`
 
 ## ✅ **4. Verificar Deploy**
 
@@ -76,10 +76,10 @@ FLASK_DEBUG=0
 - ✅ Swagger UI acessível
 
 ### **4.2 URLs de Teste**
-- **Home**: `https://escola-para-todos.onrender.com/`
-- **Login**: `https://escola-para-todos.onrender.com/login`
-- **API Docs**: `https://escola-para-todos.onrender.com/api/docs`
-- **API Turmas**: `https://escola-para-todos.onrender.com/api/turmas`
+- **Home**: `https://aqui-se-ensina.onrender.com/`
+- **Login**: `https://aqui-se-ensina.onrender.com/login`
+- **API Docs**: `https://aqui-se-ensina.onrender.com/api/docs`
+- **API Turmas**: `https://aqui-se-ensina.onrender.com/api/turmas`
 
 ## 🚨 **5. Troubleshooting**
 

@@ -1,0 +1,32 @@
+# Configurações de ambiente para Fly.io
+# Copie este arquivo para .env antes do deploy
+
+# Configurações básicas
+FLASK_ENV=production
+FLASK_DEBUG=0
+SECRET_KEY=sua-chave-secreta-super-segura-aqui
+
+# Configurações de banco de dados
+# O DATABASE_URL será definido automaticamente pelo Fly.io
+# DATABASE_URL=postgresql://usuario:senha@host:porta/database
+
+# Configurações de sessão
+PERMANENT_SESSION_LIFETIME=86400
+SESSION_COOKIE_SECURE=true
+SESSION_COOKIE_HTTPONLY=true
+SESSION_COOKIE_SAMESITE=Lax
+
+# Configurações de segurança
+WTF_CSRF_ENABLED=true
+WTF_CSRF_TIME_LIMIT=3600
+
+# Configurações de upload
+MAX_CONTENT_LENGTH=16777216
+UPLOAD_FOLDER=uploads
+
+# Configurações de paginação
+POSTS_PER_PAGE=10
+
+# Configurações específicas do Fly.io
+HOST=0.0.0.0
+PORT=8080

@@ -14,7 +14,7 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 def splash():
     """Página inicial da aplicação - FORCE UPDATE"""
     return '''
-    <h1>🚀 Escola para Todos V2 - FORCE UPDATE</h1>
+    <h1>🚀 Aqui se Ensina V2 - FORCE UPDATE</h1>
     <p>✅ Esta é a versão SEM BANCO funcionando no Render!</p>
     <p>🎯 Status: ONLINE e ATUALIZADO</p>
     <p>🔧 Versão: app_no_db.py</p>

@@ -1,8 +1,8 @@
-# 🗄️ Estrutura do Banco de Dados - Escola para Todos
+# 🗄️ Estrutura do Banco de Dados - Aqui se Ensina
 
 ## 📋 Visão Geral
 
-Este documento descreve a estrutura completa do banco de dados SQLite da aplicação **Escola para Todos**, incluindo todas as tabelas, relacionamentos e funcionalidades implementadas.
+Este documento descreve a estrutura completa do banco de dados SQLite da aplicação **Aqui se Ensina**, incluindo todas as tabelas, relacionamentos e funcionalidades implementadas.
 
 ## 🏗️ Arquitetura do Banco
 

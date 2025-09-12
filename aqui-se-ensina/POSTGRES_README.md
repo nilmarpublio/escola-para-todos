@@ -1,4 +1,4 @@
-# 🗄️ PostgreSQL - Escola para Todos
+# 🗄️ PostgreSQL - Aqui se Ensina
 
 ## 📋 **Visão Geral**
 
@@ -109,7 +109,7 @@ git push origin main
 - Banco: `psql -h localhost -U escola_user -d escola_para_todos`
 
 ### **Render:**
-- Acesse: `https://escola-para-todos.onrender.com`
+- Acesse: `https://aqui-se-ensina.onrender.com`
 - Banco: Gerenciado pelo Render
 
 ## 🛠️ **Comandos Úteis**

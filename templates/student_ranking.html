@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Ranking - EduApp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_aulas') }}">
+                            <i class="fas fa-book me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_gamificacao') }}">
+                            <i class="fas fa-gamepad me-2"></i>Gamificação
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('student_ranking') }}">
+                            <i class="fas fa-trophy me-2"></i>Ranking
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_metas') }}">
+                            <i class="fas fa-bullseye me-2"></i>Metas Semanais
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_conquistas') }}">
+                            <i class="fas fa-medal me-2"></i>Conquistas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_progresso') }}">
+                            <i class="fas fa-chart-line me-2"></i>Progresso
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-trophy me-2"></i>Ranking das Turmas
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ url_for('student_gamificacao') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-gamepad me-1"></i>Gamificação
+                        </a>
+                        <a href="{{ url_for('student_metas') }}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-bullseye me-1"></i>Minhas Metas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if rankings %}
+                {% for ranking in rankings %}
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-users me-2"></i>{{ ranking.turma[1] }} - {{ ranking.turma[2] }}
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="80">Posição</th>
+                                        <th>Aluno</th>
+                                        <th width="120">Pontos da Semana</th>
+                                        <th width="100">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for aluno in ranking.alunos %}
+                                    <tr class="{% if loop.index == 1 %}table-warning{% elif loop.index == 2 %}table-light{% elif loop.index == 3 %}table-info{% endif %}">
+                                        <td class="text-center">
+                                            {% if loop.index == 1 %}
+                                                <span class="badge bg-warning text-dark fs-6">🥇</span>
+                                            {% elif loop.index == 2 %}
+                                                <span class="badge bg-light text-dark fs-6">🥈</span>
+                                            {% elif loop.index == 3 %}
+                                                <span class="badge bg-info text-white fs-6">🥉</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ loop.index }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-3">
+                                                    <div class="avatar-title rounded-circle bg-primary text-white">
+                                                        {{ aluno[1][0] }}{{ aluno[2][0] }}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ aluno[1] }} {{ aluno[2] }}</h6>
+                                                    <small class="text-muted">@{{ aluno[0] }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="h5 mb-0 text-primary">{{ aluno[3] }}</span>
+                                            <small class="text-muted d-block">pontos</small>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if loop.index == 1 %}
+                                                <span class="badge bg-warning text-dark">Líder</span>
+                                            {% elif loop.index <= 3 %}
+                                                <span class="badge bg-info">Top 3</span>
+                                            {% elif loop.index <= 10 %}
+                                                <span class="badge bg-success">Top 10</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Participante</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Estatísticas da Turma -->
+                        <div class="row mt-4">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-primary">{{ ranking.alunos|length }}</h4>
+                                    <small class="text-muted">Total de Alunos</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-success">{{ ranking.alunos|map(attribute=3)|sum }}</h4>
+                                    <small class="text-muted">Total de Pontos</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    {% set media = (ranking.alunos|map(attribute=3)|sum / ranking.alunos|length) if ranking.alunos|length > 0 else 0 %}
+                                    <h4 class="text-info">{{ media|round(1) }}</h4>
+                                    <small class="text-muted">Média de Pontos</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-warning">{{ ranking.alunos|selectattr(3, 'gt', 0)|list|length }}</h4>
+                                    <small class="text-muted">Alunos Ativos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Nenhuma Turma Encontrada</h4>
+                    <p class="text-muted">Você não está matriculado em nenhuma turma no momento.</p>
+                    <a href="{{ url_for('student_turmas') }}" class="btn btn-primary">
+                        <i class="fas fa-users me-1"></i>Ver Minhas Turmas
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Dicas para Subir no Ranking -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-lightbulb me-2"></i>Dicas para Subir no Ranking
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-play-circle text-primary fa-2x me-3"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Complete Aulas</h6>
+                                    <small class="text-muted">Cada aula concluída vale 25 pontos</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-pencil-alt text-success fa-2x me-3"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Acertar Exercícios</h6>
+                                    <small class="text-muted">Exercícios valem de 5 a 15 pontos</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-bullseye text-warning fa-2x me-3"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Cumprir Metas</h6>
+                                    <small class="text-muted">Metas semanais dão recompensas especiais</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-trophy text-info fa-2x me-3"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Desbloquear Conquistas</h6>
+                                    <small class="text-muted">Conquistas valem de 50 a 500 pontos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+    }
+
+    .avatar-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+</style>
+{% endblock %}

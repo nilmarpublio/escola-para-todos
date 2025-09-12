@@ -667,7 +667,7 @@ def insert_sample_data():
 
 def main():
     """Função principal"""
-    print("🚀 Inicializando banco de dados SQLite da Escola para Todos...")
+    print("🚀 Inicializando banco de dados SQLite da Aqui se Ensina...")
     print("=" * 70)
     
     try:

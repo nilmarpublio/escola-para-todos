@@ -431,7 +431,7 @@ def health():
 def version():
     """Versão da aplicação"""
     return {
-        'app': 'Escola para Todos',
+        'app': 'Aqui se Ensina',
         'version': '2.0.0',
         'database': 'SQLite (Local)',
         'environment': os.getenv('FLASK_ENV', 'development')
@@ -465,7 +465,7 @@ if __name__ == '__main__':
         init_db.init_database()
         print("✅ Banco SQLite criado com sucesso!")
     
-    print("🚀 Iniciando Escola para Todos (SQLite)")
+    print("🚀 Iniciando Aqui se Ensina (SQLite)")
     print("📊 Banco: SQLite local")
     print("🌍 Ambiente:", os.getenv('FLASK_ENV', 'development'))
     

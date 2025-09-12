@@ -13,7 +13,7 @@ def home():
     return '''
     <html>
     <head>
-        <title>🎓 Escola para Todos</title>
+        <title>🎓 Aqui se Ensina</title>
         <style>
             body { 
                 font-family: Arial, sans-serif; 
@@ -61,7 +61,7 @@ def home():
     </head>
     <body>
         <div class="container">
-            <h1>🎓 Escola para Todos</h1>
+            <h1>🎓 Aqui se Ensina</h1>
             <h2>Sistema de Educação Digital</h2>
             
             <div class="status">
@@ -116,7 +116,7 @@ def health():
         <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <h1 style="color: #28a745;">🏥 Health Check</h1>
             <h2 style="color: #28a745;">✅ Status: Saudável</h2>
-            <p><strong>Aplicação:</strong> Escola para Todos</strong></p>
+            <p><strong>Aplicação:</strong> Aqui se Ensina</strong></p>
             <p><strong>Status:</strong> Online e funcionando</strong></p>
             <p><strong>Servidor:</strong> Render</strong></p>
             <p><strong>Framework:</strong> Flask</strong></p>

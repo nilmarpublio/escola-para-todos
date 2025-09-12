@@ -1,2 +1,2 @@
-# Services package for Escola para Todos
+# Services package for Aqui se Ensina
 # Contains business logic and data processing services

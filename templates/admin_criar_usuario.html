@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Usuário - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_usuarios') }}">
+                            <i class="fas fa-users me-2"></i>Gerenciar Usuários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorio_usuarios') }}">
+                            <i class="fas fa-user-chart me-2"></i>Relatório Usuários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_relatorio_turmas') }}">
+                            <i class="fas fa-chalkboard me-2"></i>Relatório Turmas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-user-plus me-2"></i>Criar Novo Usuário
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Formulário de Criação -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-info-circle me-2"></i>Informações do Usuário
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" id="createUserForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label">
+                                            <i class="fas fa-user me-2"></i>Nome de Usuário <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="username" name="username" required
+                                            minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+"
+                                            title="Apenas letras, números e underscore">
+                                        <div class="form-text">Mínimo 3 caracteres, apenas letras, números e underscore
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">
+                                            <i class="fas fa-envelope me-2"></i>Email <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                        <div class="form-text">Email válido para contato</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="first_name" class="form-label">
+                                            <i class="fas fa-id-card me-2"></i>Nome <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name"
+                                            required minlength="2" maxlength="50">
+                                        <div class="form-text">Nome real do usuário</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="last_name" class="form-label">
+                                            <i class="fas fa-id-card me-2"></i>Sobrenome <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" required
+                                            minlength="2" maxlength="50">
+                                        <div class="form-text">Sobrenome do usuário</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="user_type" class="form-label">
+                                            <i class="fas fa-users me-2"></i>Tipo de Usuário <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" id="user_type" name="user_type" required>
+                                            <option value="">Selecione o tipo...</option>
+                                            <option value="aluno">👨‍🎓 Aluno</option>
+                                            <option value="professor">👨‍🏫 Professor</option>
+                                            <option value="admin">👨‍💼 Administrador</option>
+                                        </select>
+                                        <div class="form-text">Define as permissões do usuário no sistema</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">
+                                            <i class="fas fa-lock me-2"></i>Senha <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="password" name="password"
+                                                required minlength="6" maxlength="50">
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                onclick="togglePassword()">
+                                                <i class="fas fa-eye" id="passwordIcon"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Mínimo 6 caracteres</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirm_password" class="form-label">
+                                            <i class="fas fa-lock me-2"></i>Confirmar Senha <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input type="password" class="form-control" id="confirm_password"
+                                            name="confirm_password" required minlength="6" maxlength="50">
+                                        <div class="form-text">Digite a mesma senha novamente</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sendWelcomeEmail">
+                                            <label class="form-check-label" for="sendWelcomeEmail">
+                                                <i class="fas fa-envelope me-2"></i>Enviar email de boas-vindas
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                        <i class="fas fa-undo me-2"></i>Limpar Formulário
+                                    </button>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-info me-2" onclick="previewUser()">
+                                            <i class="fas fa-eye me-2"></i>Pré-visualizar
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Criar Usuário
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview e Ajuda -->
+                <div class="col-lg-4">
+                    <!-- Preview do Usuário -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-eye me-2"></i>Pré-visualização
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="userPreview" class="text-center py-4">
+                                <i class="fas fa-user-circle fa-4x text-muted mb-3"></i>
+                                <p class="text-muted">Preencha o formulário para ver a pré-visualização</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dicas de Criação -->
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-lightbulb me-2"></i>Dicas de Criação
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Boas Práticas:</h6>
+                                <ul class="mb-0 small">
+                                    <li>Use nomes de usuário únicos e fáceis de lembrar</li>
+                                    <li>Senhas devem ter pelo menos 6 caracteres</li>
+                                    <li>Email deve ser válido para comunicação</li>
+                                    <li>Escolha o tipo de usuário com cuidado</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-exclamation-triangle me-2"></i>Permissões:</h6>
+                                <ul class="mb-0 small">
+                                    <li><strong>Aluno:</strong> Acesso a aulas e exercícios</li>
+                                    <li><strong>Professor:</strong> Criação de conteúdo e turmas</li>
+                                    <li><strong>Admin:</strong> Controle total do sistema</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .alert {
+        border: none;
+        border-radius: 0.35rem;
+    }
+
+    .alert ul {
+        padding-left: 1.2rem;
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const passwordIcon = document.getElementById('passwordIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordIcon.classList.remove('fa-eye');
+            passwordIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordIcon.classList.remove('fa-eye-slash');
+            passwordIcon.classList.add('fa-eye');
+        }
+    }
+
+    function resetForm() {
+        document.getElementById('createUserForm').reset();
+        document.getElementById('userPreview').innerHTML = `
+        <i class="fas fa-user-circle fa-4x text-muted mb-3"></i>
+        <p class="text-muted">Preencha o formulário para ver a pré-visualização</p>
+    `;
+    }
+
+    function previewUser() {
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const firstName = document.getElementById('first_name').value;
+        const lastName = document.getElementById('last_name').value;
+        const userType = document.getElementById('user_type').value;
+
+        if (!username || !email || !firstName || !lastName || !userType) {
+            alert('Por favor, preencha todos os campos obrigatórios para ver a pré-visualização.');
+            return;
+        }
+
+        const userTypeDisplay = {
+            'aluno': '👨‍🎓 Aluno',
+            'professor': '👨‍🏫 Professor',
+            'admin': '👨‍💼 Administrador'
+        };
+
+        document.getElementById('userPreview').innerHTML = `
+        <div class="text-center">
+            <div class="avatar-preview mb-3">
+                <i class="fas fa-user-circle fa-4x text-primary"></i>
+            </div>
+            <h5 class="mb-1">${firstName} ${lastName}</h5>
+            <p class="text-muted mb-2">@${username}</p>
+            <span class="badge bg-${userType === 'aluno' ? 'success' : userType === 'professor' ? 'info' : 'warning'} mb-2">
+                ${userTypeDisplay[userType]}
+            </span>
+            <p class="text-muted small mb-0">${email}</p>
+        </div>
+    `;
+    }
+
+    // Validação de senha
+    document.getElementById('confirm_password').addEventListener('input', function () {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+
+        if (password !== confirmPassword) {
+            this.setCustomValidity('As senhas não coincidem');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    // Validação do formulário
+    document.getElementById('createUserForm').addEventListener('submit', function (e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('As senhas não coincidem!');
+            return false;
+        }
+
+        if (password.length < 6) {
+            e.preventDefault();
+            alert('A senha deve ter pelo menos 6 caracteres!');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

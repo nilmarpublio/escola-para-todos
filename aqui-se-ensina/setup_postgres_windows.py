@@ -137,7 +137,7 @@ def create_env_file():
         return
     
     print("📝 Criando arquivo .env...")
-    env_content = """# Configurações para PostgreSQL - Escola para Todos
+    env_content = """# Configurações para PostgreSQL - Aqui se Ensina
 
 # Configurações da Aplicação
 FLASK_ENV=development
@@ -171,7 +171,7 @@ def show_postgres_commands():
 
 def main():
     """Função principal"""
-    print("🚀 Configurando PostgreSQL para Escola para Todos (Windows)")
+    print("🚀 Configurando PostgreSQL para Aqui se Ensina (Windows)")
     print("=" * 60)
     
     print("📋 IMPORTANTE: Este script assume que:")

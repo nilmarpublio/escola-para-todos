@@ -1,2 +1,2 @@
-# Utils package for Escola para Todos
+# Utils package for Aqui se Ensina
 # Contains helper functions and utilities

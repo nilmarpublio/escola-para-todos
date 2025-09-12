@@ -1,4 +1,4 @@
-# 🚀 Deploy no Render - Escola para Todos
+# 🚀 Deploy no Render - Aqui se Ensina
 
 ## 📋 Pré-requisitos
 
@@ -61,9 +61,9 @@ git push origin main
 ## 🔍 URLs de Teste
 
 Após o deploy, testar:
-- **Página inicial**: `https://escola-para-todos.onrender.com/`
-- **Login**: `https://escola-para-todos.onrender.com/login`
-- **Health check**: `https://escola-para-todos.onrender.com/health`
+- **Página inicial**: `https://aqui-se-ensina.onrender.com/`
+- **Login**: `https://aqui-se-ensina.onrender.com/login`
+- **Health check**: `https://aqui-se-ensina.onrender.com/health`
 
 ## 👥 Usuários de Teste
 

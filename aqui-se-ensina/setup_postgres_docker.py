@@ -111,7 +111,7 @@ def create_env_file():
         return
     
     print("📝 Criando arquivo .env...")
-    env_content = """# Configurações para PostgreSQL - Escola para Todos
+    env_content = """# Configurações para PostgreSQL - Aqui se Ensina
 
 # Configurações da Aplicação
 FLASK_ENV=development
@@ -142,7 +142,7 @@ def show_docker_commands():
 
 def main():
     """Função principal"""
-    print("🚀 Configurando PostgreSQL com Docker para Escola para Todos")
+    print("🚀 Configurando PostgreSQL com Docker para Aqui se Ensina")
     print("=" * 60)
     
     # Verificar se Docker está instalado

@@ -87,9 +87,9 @@ def test():
     """Página de teste"""
     return '''
     <html>
-    <head><title>Teste - Escola para Todos</title></head>
+    <head><title>Teste - Aqui se Ensina</title></head>
     <body>
-        <h1>🎓 Escola para Todos</h1>
+        <h1>🎓 Aqui se Ensina</h1>
         <h2>✅ Aplicação funcionando no Render!</h2>
         <p>Esta é uma versão simplificada para teste.</p>
         <ul>

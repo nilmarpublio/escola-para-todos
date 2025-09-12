@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Exercício - {{ exercicio[5] }} - EduApp{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mt-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('student_dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('student_aulas') }}">Minhas Aulas</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('student_aula_view', aula_id=exercicio[4]) }}">{{ exercicio[5] }}</a></li>
+                    <li class="breadcrumb-item active">Exercício</li>
+                </ol>
+            </nav>
+
+            <!-- Header do Exercício -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-clipboard-list me-2"></i>Exercício
+                        </h4>
+                        <span class="badge bg-light text-primary fs-6">{{ exercicio[6] }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title mb-3">{{ exercicio[1] }}</h5>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Selecione a resposta correta e clique em "Verificar Resposta"
+                    </p>
+                </div>
+            </div>
+
+            <!-- Formulário do Exercício -->
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" id="exercicioForm">
+                        <div class="mb-4">
+                            <h6 class="mb-3">Alternativas:</h6>
+                            {% for alternativa in alternativas %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="resposta" 
+                                       id="alternativa{{ loop.index }}" value="{{ alternativa }}" required>
+                                <label class="form-check-label" for="alternativa{{ loop.index }}">
+                                    <span class="alternativa-text">{{ alternativa }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-check me-2"></i>Verificar Resposta
+                            </button>
+                            <a href="{{ url_for('student_aula_view', aula_id=exercicio[4]) }}" 
+                               class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Voltar à Aula
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dicas e Ajuda -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Dicas para Resolver
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Leia atentamente o enunciado</li>
+                        <li>Analise todas as alternativas antes de escolher</li>
+                        <li>Elimine as opções que claramente estão incorretas</li>
+                        <li>Se não tiver certeza, faça uma escolha educada</li>
+                        <li>Lembre-se: cada exercício vale pontos!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Progresso da Aula -->
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Seu Progresso na Aula
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="display-6 text-primary">1</div>
+                            <small class="text-muted">Exercício Atual</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="display-6 text-success">0</div>
+                            <small class="text-muted">Pontos Ganhos</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="display-6 text-info">0%</div>
+                            <small class="text-muted">Progresso</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+    }
+
+    .form-check-input:checked {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .form-check-input:checked + .form-check-label {
+        color: #007bff;
+        font-weight: 600;
+    }
+
+    .form-check {
+        padding: 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .form-check:hover {
+        border-color: #007bff;
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .form-check-input:checked + .form-check-label + .form-check {
+        border-color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .btn {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+    }
+
+    .alternativa-text {
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    .badge {
+        font-size: 0.875em;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('exercicioForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const alternativas = document.querySelectorAll('input[name="resposta"]');
+
+    // Marcar o label quando o radio for selecionado
+    alternativas.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Remover seleção anterior
+            document.querySelectorAll('.form-check').forEach(check => {
+                check.style.borderColor = '#e9ecef';
+                check.style.backgroundColor = 'transparent';
+            });
+
+            // Marcar a seleção atual
+            if (this.checked) {
+                const checkDiv = this.closest('.form-check');
+                checkDiv.style.borderColor = '#007bff';
+                checkDiv.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+            }
+        });
+    });
+
+    // Validação do formulário
+    form.addEventListener('submit', function(e) {
+        const respostaSelecionada = document.querySelector('input[name="resposta"]:checked');
+        
+        if (!respostaSelecionada) {
+            e.preventDefault();
+            alert('❌ Por favor, selecione uma resposta antes de continuar.');
+            return false;
+        }
+
+        // Desabilitar botão para evitar múltiplos envios
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Verificando...';
+    });
+
+    // Adicionar efeito de clique nos labels
+    document.querySelectorAll('.form-check-label').forEach(label => {
+        label.addEventListener('click', function() {
+            const radio = this.previousElementSibling;
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change'));
+        });
+    });
+});
+</script>
+{% endblock %}

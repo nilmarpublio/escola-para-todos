@@ -1,4 +1,4 @@
-# 🚀 Guia de Desenvolvimento - Escola para Todos
+# 🚀 Guia de Desenvolvimento - Aqui se Ensina
 
 Este documento contém instruções para desenvolvedores sobre como trabalhar com o projeto e suas funcionalidades de escalabilidade.
 
