@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topico[1] }} - Fórum{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_aulas') }}">
+                            <i class="fas fa-book me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_gamificacao') }}">
+                            <i class="fas fa-gamepad me-2"></i>Gamificação
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('forum') }}">
+                            <i class="fas fa-comments me-2"></i>Fórum
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_ranking') }}">
+                            <i class="fas fa-trophy me-2"></i>Ranking
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mt-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('forum') }}">Fórum</a></li>
+                    <li class="breadcrumb-item active">{{ topico[1]|truncate(50) }}</li>
+                </ol>
+            </nav>
+
+            <!-- Tópico Principal -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">{{ topico[1] }}</h4>
+                        <div class="d-flex gap-2">
+                            {% if topico[4] == 'aberto' %}
+                            <span class="badge bg-primary">{{ topico[4]|title }}</span>
+                            {% elif topico[4] == 'resolvido' %}
+                            <span class="badge bg-success">{{ topico[4]|title }}</span>
+                            {% else %}
+                            <span class="badge bg-warning">{{ topico[4]|title }}</span>
+                            {% endif %}
+                            <span class="badge bg-secondary">{{ topico[3]|title }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-1 text-center">
+                            <div class="mb-2">
+                                <i class="fas fa-user-circle fa-2x text-primary"></i>
+                            </div>
+                            <small class="text-muted d-block">{{ topico[8]|title }}</small>
+                            {% if topico[9] == 'professor' %}
+                            <span class="badge bg-info badge-sm">Professor</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-11">
+                            <div class="mb-3">
+                                <p class="mb-2">{{ topico[2] }}</p>
+                            </div>
+
+                            {% if tags %}
+                            <div class="mb-3">
+                                {% for tag in tags %}
+                                <span class="badge" style="background-color: {{ tag[1] }}; color: white;">{{ tag[0]
+                                    }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-muted small">
+                                    <i class="fas fa-clock me-1"></i>{{ format_datetime(topico[5], '%d/%m/%Y %H:%M') }}
+                                    <i class="fas fa-eye ms-3 me-1"></i>{{ topico[6] }} visualizações
+                                    <i class="fas fa-book ms-3 me-1"></i>{{ topico[10] }}
+                                </div>
+
+                                <div class="btn-group">
+                                    {% if topico[4] == 'aberto' and (topico[7] == current_user.id or
+                                    current_user.user_type == 'professor') %}
+                                    <a href="{{ url_for('forum_fechar_topico', topico_id=topico[0]) }}"
+                                        class="btn btn-sm btn-warning" onclick="return confirm('Fechar este tópico?')">
+                                        <i class="fas fa-lock me-1"></i>Fechar
+                                    </a>
+                                    {% endif %}
+
+                                    {% if topico[7] == current_user.id or current_user.user_type == 'professor' %}
+                                    <a href="{{ url_for('forum_excluir_topico', topico_id=topico[0]) }}"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Excluir este tópico? Esta ação não pode ser desfeita.')">
+                                        <i class="fas fa-trash me-1"></i>Excluir
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Respostas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-reply me-2"></i>Respostas ({{ respostas|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if respostas %}
+                    {% for resposta in respostas %}
+                    <div class="border-bottom pb-3 mb-3 {% if resposta[5] %}border-success{% endif %}">
+                        <div class="row">
+                            <div class="col-md-1 text-center">
+                                <div class="mb-2">
+                                    <i class="fas fa-user-circle fa-2x text-info"></i>
+                                </div>
+                                <small class="text-muted d-block">{{ resposta[7]|title }}</small>
+                                {% if resposta[8] == 'professor' %}
+                                <span class="badge bg-info badge-sm">Professor</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-11">
+                                <div class="mb-2">
+                                    {% if resposta[5] %}
+                                    <span class="badge bg-success mb-2">
+                                        <i class="fas fa-check me-1"></i>Melhor Resposta
+                                    </span>
+                                    {% endif %}
+                                    <p class="mb-2">{{ resposta[2] }}</p>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted small">
+                                        <i class="fas fa-clock me-1"></i>{{ format_datetime(resposta[3], '%d/%m/%Y
+                                        %H:%M') }}
+                                    </div>
+
+                                    <div class="btn-group">
+                                        {% if topico[4] == 'aberto' and topico[7] == current_user.id and not resposta[5]
+                                        %}
+                                        <a href="{{ url_for('forum_melhor_resposta', resposta_id=resposta[0]) }}"
+                                            class="btn btn-sm btn-success"
+                                            onclick="return confirm('Marcar como melhor resposta?')">
+                                            <i class="fas fa-check me-1"></i>Melhor
+                                        </a>
+                                        {% endif %}
+
+                                        <a href="{{ url_for('forum_votar_resposta', resposta_id=resposta[0], tipo='positivo') }}"
+                                            class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-thumbs-up me-1"></i>👍
+                                        </a>
+                                        <a href="{{ url_for('forum_votar_resposta', resposta_id=resposta[0], tipo='negativo') }}"
+                                            class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-thumbs-down me-1"></i>👎
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhuma resposta ainda</h5>
+                        <p class="text-muted">Seja o primeiro a responder!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Formulário de Resposta -->
+            {% if topico[4] == 'aberto' %}
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-edit me-2"></i>Adicionar Resposta
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('forum_responder', topico_id=topico[0]) }}">
+                        <div class="mb-3">
+                            <label for="conteudo" class="form-label">Sua resposta:</label>
+                            <textarea class="form-control" id="conteudo" name="conteudo" rows="4"
+                                placeholder="Digite sua resposta aqui..." required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Enviar Resposta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-lock me-2"></i>
+                Este tópico está fechado e não aceita novas respostas.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .border-success {
+        border-color: #28a745 !important;
+        background-color: rgba(40, 167, 69, 0.05);
+    }
+
+    .badge-sm {
+        font-size: 0.75em;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+
+{% block title %}Meu Progresso - EduApp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_aulas') }}">
+                            <i class="fas fa-book me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_conquistas') }}">
+                            <i class="fas fa-trophy me-2"></i>Conquistas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('student_progresso') }}">
+                            <i class="fas fa-chart-line me-2"></i>Progresso
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-chart-line me-2"></i>Meu Progresso
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary"
+                            onclick="filtrarPorDisciplina('todas')">
+                            <i class="fas fa-filter me-1"></i>Todas
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success"
+                            onclick="filtrarPorDisciplina('concluidas')">
+                            <i class="fas fa-check me-1"></i>Concluídas
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning"
+                            onclick="filtrarPorDisciplina('em_andamento')">
+                            <i class="fas fa-play me-1"></i>Em Andamento
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas Gerais -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total de Aulas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.total_aulas }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-book fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Aulas Concluídas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.aulas_concluidas }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Total de Pontos
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ data.total_pontos }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-star fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Tempo de Estudo
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {% if data.tempo_total %}
+                                        {{ (data.tempo_total // 60) }}h {{ data.tempo_total % 60 }}min
+                                        {% else %}
+                                        0h
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progresso por Disciplina -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-graduation-cap me-2"></i>Progresso por Disciplina
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.progresso_disciplina %}
+                            <div class="row">
+                                {% for disciplina, stats in data.progresso_disciplina.items() %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-primary">{{ disciplina }}</h6>
+                                            <div class="progress mb-3" style="height: 20px;">
+                                                {% set percentual = ((stats.concluidas / stats.total) * 100) | round(1)
+                                                %}
+                                                <div class="progress-bar bg-success" role="progressbar"
+                                                    style="width: {{ percentual }}%" aria-valuenow="{{ percentual }}"
+                                                    aria-valuemin="0" aria-valuemax="100">
+                                                    {{ percentual }}%
+                                                </div>
+                                            </div>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    {{ stats.concluidas }} de {{ stats.total }} aulas concluídas
+                                                </small>
+                                            </p>
+                                            <span class="badge bg-info">{{ stats.pontos }} pontos</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Nenhum progresso registrado</h5>
+                                <p class="text-muted">Comece assistindo às aulas para ver seu progresso!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progresso por Série -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-success">
+                                <i class="fas fa-layer-group me-2"></i>Progresso por Série
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.progresso_serie %}
+                            <div class="row">
+                                {% for serie, stats in data.progresso_serie.items() %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-success">{{ serie }}</h6>
+                                            <div class="progress mb-3" style="height: 20px;">
+                                                {% set percentual = ((stats.concluidas / stats.total) * 100) | round(1)
+                                                %}
+                                                <div class="progress-bar bg-success" role="progressbar"
+                                                    style="width: {{ percentual }}%" aria-valuenow="{{ percentual }}"
+                                                    aria-valuemin="0" aria-valuemax="100">
+                                                    {{ percentual }}%
+                                                </div>
+                                            </div>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    {{ stats.concluidas }} de {{ stats.total }} aulas concluídas
+                                                </small>
+                                            </p>
+                                            <span class="badge bg-success">{{ stats.pontos }} pontos</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista Detalhada de Aulas -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-info">
+                                <i class="fas fa-list me-2"></i>Progresso Detalhado das Aulas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if data.aulas_progresso %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Aula</th>
+                                            <th>Disciplina</th>
+                                            <th>Série</th>
+                                            <th>Status</th>
+                                            <th>Pontuação</th>
+                                            <th>Tempo Assistido</th>
+                                            <th>Última Atividade</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for aula in data.aulas_progresso %}
+                                        <tr class="aula-row" data-status="{{ aula[5] or 'nao_iniciado' }}">
+                                            <td>
+                                                <strong>{{ aula[1] }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ aula[2] }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ aula[3] }}</span>
+                                            </td>
+                                            <td>
+                                                {% if not aula[5] or aula[5] == 'nao_iniciado' %}
+                                                <span class="badge bg-secondary">⏳ Não Iniciado</span>
+                                                {% elif aula[5] == 'em_andamento' %}
+                                                <span class="badge bg-warning">▶️ Em Andamento</span>
+                                                {% elif aula[5] == 'concluido' %}
+                                                <span class="badge bg-success">✅ Concluído</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ aula[6] or 0 }} pts</span>
+                                            </td>
+                                            <td>
+                                                {% if aula[7] %}
+                                                {{ (aula[7] // 60) }}min {{ aula[7] % 60 }}s
+                                                {% else %}
+                                                <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if aula[8] %}
+                                                {{ aula[8] }}
+                                                {% else %}
+                                                <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if not aula[5] or aula[5] == 'nao_iniciado' %}
+                                                <a href="{{ url_for('student_aula_view', aula_id=aula[0]) }}"
+                                                    class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-play me-1"></i>Iniciar
+                                                </a>
+                                                {% elif aula[5] == 'em_andamento' %}
+                                                <a href="{{ url_for('student_aula_view', aula_id=aula[0]) }}"
+                                                    class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-play me-1"></i>Continuar
+                                                </a>
+                                                {% elif aula[5] == 'concluido' %}
+                                                <a href="{{ url_for('student_aula_view', aula_id=aula[0]) }}"
+                                                    class="btn btn-sm btn-success">
+                                                    <i class="fas fa-eye me-1"></i>Rever
+                                                </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Nenhuma aula encontrada</h5>
+                                <p class="text-muted">Entre em contato com seu professor para ter acesso às aulas.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .border-left-primary {
+        border-left: 0.25rem solid #007bff !important;
+    }
+
+    .border-left-success {
+        border-left: 0.25rem solid #28a745 !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #17a2b8 !important;
+    }
+
+    .border-left-warning {
+        border-left: 0.25rem solid #ffc107 !important;
+    }
+
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .progress {
+        border-radius: 10px;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+    }
+
+    .aula-row {
+        transition: all 0.3s ease;
+    }
+
+    .aula-row:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .aula-row.hidden {
+        display: none;
+    }
+</style>
+
+<script>
+    function filtrarPorDisciplina(tipo) {
+        const aulas = document.querySelectorAll('.aula-row');
+
+        aulas.forEach(aula => {
+            const status = aula.dataset.status;
+
+            if (tipo === 'todas') {
+                aula.classList.remove('hidden');
+            } else if (tipo === 'concluidas') {
+                if (status === 'concluido') {
+                    aula.classList.remove('hidden');
+                } else {
+                    aula.classList.add('hidden');
+                }
+            } else if (tipo === 'em_andamento') {
+                if (status === 'em_andamento') {
+                    aula.classList.remove('hidden');
+                } else {
+                    aula.classList.add('hidden');
+                }
+            }
+        });
+
+        // Atualizar botões ativos
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    }
+
+    // Inicializar filtros
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mostrar todas as aulas por padrão
+        filtrarPorDisciplina('todas');
+    });
+</script>
+{% endblock %}

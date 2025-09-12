@@ -1,0 +1,469 @@
+{% extends "base.html" %}
+
+{% block title %}Gamificação - Aqui se Aprende{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header da Gamificação -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-warning text-white">
+                <div class="card-body text-center">
+                    <div class="gamification-header mb-3">
+                        <i class="fas fa-trophy fa-4x mb-3"></i>
+                        <h1 class="h2 mb-2">Sistema de Gamificação</h1>
+                        <p class="lead mb-0">Transforme seu aprendizado em uma aventura épica! 🚀</p>
+                    </div>
+                    <div class="level-info">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="level-badge me-3">
+                                <h2 class="mb-0">{{ nivel_atual }}</h2>
+                                <small>Nível</small>
+                            </div>
+                            <div class="level-progress">
+                                <div class="progress" style="width: 200px; height: 20px;">
+                                    <div class="progress-bar bg-light" style="width: {{ progresso_nivel }}%"></div>
+                                </div>
+                                <small class="text-white">{{ progresso_nivel }}% para o próximo nível</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Estatísticas Principais -->
+        <div class="col-lg-8">
+            <!-- Pontuação e Conquistas -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star me-2"></i>
+                        Sua Pontuação
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon bg-primary text-white">
+                                    <i class="fas fa-coins fa-2x"></i>
+                                </div>
+                                <h3 class="text-primary mt-3">{{ total_pontos }}</h3>
+                                <p class="text-muted">Total de Pontos</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon bg-success text-white">
+                                    <i class="fas fa-medal fa-2x"></i>
+                                </div>
+                                <h3 class="text-success mt-3">{{ total_conquistas }}</h3>
+                                <p class="text-muted">Conquistas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon bg-info text-white">
+                                    <i class="fas fa-book fa-2x"></i>
+                                </div>
+                                <h3 class="text-info mt-3">{{ aulas_concluidas }}</h3>
+                                <p class="text-muted">Aulas Concluídas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conquistas -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-medal me-2"></i>
+                        Suas Conquistas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for conquista in conquistas %}
+                        <div class="col-md-6">
+                            <div class="achievement-card {{ 'unlocked' if conquista.desbloqueada else 'locked' }}">
+                                <div class="achievement-icon">
+                                    <i class="fas fa-{{ conquista.icone }} fa-2x"></i>
+                                </div>
+                                <div class="achievement-info">
+                                    <h6 class="mb-1">{{ conquista.nome }}</h6>
+                                    <p class="text-muted small mb-1">{{ conquista.descricao }}</p>
+                                    <div class="achievement-meta">
+                                        <span class="badge bg-{{ conquista.cor }}">
+                                            {% if conquista.desbloqueada %}
+                                            ✓ Desbloqueada
+                                            {% else %}
+                                            🔒 Bloqueada
+                                            {% endif %}
+                                        </span>
+                                        <small class="text-muted ms-2">{{ conquista.pontos }} pts</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking -->
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ranking-star me-2"></i>
+                        Ranking da Turma
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="ranking-list">
+                        {% for posicao, aluno in ranking %}
+                        <div class="ranking-item {{ 'current-user' if aluno.id == current_user.id else '' }}">
+                            <div class="ranking-position">
+                                {% if posicao == 1 %}
+                                <i class="fas fa-crown text-warning fa-2x"></i>
+                                {% elif posicao == 2 %}
+                                <i class="fas fa-medal text-secondary fa-2x"></i>
+                                {% elif posicao == 3 %}
+                                <i class="fas fa-award text-bronze fa-2x"></i>
+                                {% else %}
+                                <span class="ranking-number">{{ posicao }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="ranking-user">
+                                <h6 class="mb-1">{{ aluno.nome }}</h6>
+                                <small class="text-muted">{{ aluno.turma }}</small>
+                            </div>
+                            <div class="ranking-points">
+                                <span class="badge bg-primary">{{ aluno.pontos }} pts</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Próximas Metas -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bullseye me-2"></i>
+                        Próximas Metas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for meta in proximas_metas %}
+                    <div class="goal-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">{{ meta.nome }}</h6>
+                            <small class="text-muted">{{ meta.progresso }}%</small>
+                        </div>
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-info" style="width: {{ meta.progresso }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ meta.descricao }}</small>
+                        <div class="goal-reward mt-2">
+                            <span class="badge bg-warning">
+                                <i class="fas fa-gift me-1"></i>
+                                {{ meta.recompensa }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Estatísticas Semanais -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Esta Semana
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="weekly-stats">
+                        <div class="stat-item text-center mb-3">
+                            <h4 class="text-success mb-1">{{ stats_semana.pontos_ganhos }}</h4>
+                            <small class="text-muted">Pontos Ganhos</small>
+                        </div>
+                        <div class="stat-item text-center mb-3">
+                            <h4 class="text-primary mb-1">{{ stats_semana.aulas_concluidas }}</h4>
+                            <small class="text-muted">Aulas Concluídas</small>
+                        </div>
+                        <div class="stat-item text-center">
+                            <h4 class="text-warning mb-1">{{ stats_semana.dias_ativos }}</h4>
+                            <small class="text-muted">Dias Ativos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Ações
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" id="compartilhar-conquista">
+                            <i class="fas fa-share me-2"></i>
+                            Compartilhar Conquista
+                        </button>
+                        <button class="btn btn-outline-success" id="ver-ranking-completo">
+                            <i class="fas fa-list me-2"></i>
+                            Ver Ranking Completo
+                        </button>
+                        <button class="btn btn-outline-warning" id="definir-meta">
+                            <i class="fas fa-bullseye me-2"></i>
+                            Definir Nova Meta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+    }
+
+    .gamification-header {
+        animation: fadeInDown 1s ease;
+    }
+
+    .level-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 20px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+
+    .level-progress {
+        text-align: left;
+    }
+
+    .stat-card {
+        padding: 20px;
+        border-radius: 15px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .achievement-card {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-radius: 15px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .achievement-card.unlocked {
+        border-color: #28a745;
+        background: #d4edda;
+    }
+
+    .achievement-card.locked {
+        opacity: 0.6;
+        background: #e9ecef;
+    }
+
+    .achievement-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .achievement-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+
+    .achievement-info {
+        flex: 1;
+    }
+
+    .ranking-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .ranking-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .ranking-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .ranking-item.current-user {
+        background: #e3f2fd;
+        border: 2px solid #2196f3;
+    }
+
+    .ranking-position {
+        width: 60px;
+        text-align: center;
+        margin-right: 15px;
+    }
+
+    .ranking-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #6c757d;
+    }
+
+    .ranking-user {
+        flex: 1;
+    }
+
+    .ranking-points {
+        text-align: right;
+    }
+
+    .goal-item {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .goal-item:hover {
+        background: #e9ecef;
+        transform: scale(1.02);
+    }
+
+    .weekly-stats .stat-item {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .weekly-stats .stat-item:hover {
+        transform: scale(1.05);
+        background: #e9ecef;
+    }
+
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .btn {
+        border-radius: 25px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .text-bronze {
+        color: #cd7f32;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Efeito de confete ao carregar a página
+        setTimeout(() => {
+            document.querySelector('.gamification-header').style.animation = 'fadeInDown 1s ease';
+        }, 500);
+
+        // Compartilhar conquista
+        document.getElementById('compartilhar-conquista').addEventListener('click', function () {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Conquista Desbloqueada!',
+                    text: 'Acabei de desbloquear uma conquista na Aqui se Aprende! 🎉',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback para navegadores que não suportam Web Share API
+                alert('Compartilhe sua conquista nas redes sociais! 🎉');
+            }
+        });
+
+        // Ver ranking completo
+        document.getElementById('ver-ranking-completo').addEventListener('click', function () {
+            // Aqui você pode implementar a lógica para mostrar o ranking completo
+            alert('Ranking completo em desenvolvimento! 📊');
+        });
+
+        // Definir nova meta
+        document.getElementById('definir-meta').addEventListener('click', function () {
+            // Aqui você pode implementar a lógica para definir novas metas
+            alert('Sistema de metas em desenvolvimento! 🎯');
+        });
+
+        // Efeito de hover nas conquistas
+        document.querySelectorAll('.achievement-card').forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                if (this.classList.contains('unlocked')) {
+                    this.style.transform = 'translateY(-5px) scale(1.02)';
+                }
+            });
+
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

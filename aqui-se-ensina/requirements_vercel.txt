@@ -1,0 +1,10 @@
+# Dependências para Vercel + Supabase
+Flask==2.3.3
+Flask-Login==0.6.3
+Flask-RESTful==0.3.10
+Flask-Swagger-UI==4.11.1
+python-dotenv==1.0.0
+Werkzeug==2.3.7
+supabase==2.3.4
+psycopg2-binary==2.9.9
+gunicorn==21.2.0

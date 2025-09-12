@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Nova Aula - Professor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_aulas') }}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Minhas Aulas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_turmas') }}">
+                            <i class="fas fa-users me-2"></i>Minhas Turmas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('professor_criar_aula') }}">
+                            <i class="fas fa-plus me-2"></i>Criar Aula
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('professor_relatorios') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-plus me-2"></i>Criar Nova Aula
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('professor_aulas') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar para Aulas
+                    </a>
+                </div>
+            </div>
+
+            <!-- Formulário de Criação -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-edit me-2"></i>Informações da Aula
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" id="form-aula">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            <label for="titulo" class="form-label">
+                                                <strong>Título da Aula *</strong>
+                                            </label>
+                                            <input type="text" class="form-control" id="titulo" name="titulo" 
+                                                   placeholder="Ex: Introdução às Equações do 1º Grau" required>
+                                            <div class="form-text">Título claro e descritivo da aula</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="duracao_minutos" class="form-label">
+                                                <strong>Duração (minutos)</strong>
+                                            </label>
+                                            <input type="number" class="form-control" id="duracao_minutos" 
+                                                   name="duracao_minutos" min="5" max="180" placeholder="45">
+                                            <div class="form-text">Tempo estimado para completar a aula</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="disciplina" class="form-label">
+                                                <strong>Disciplina *</strong>
+                                            </label>
+                                            <select class="form-select" id="disciplina" name="disciplina" required>
+                                                <option value="">Selecione uma disciplina</option>
+                                                <option value="Matemática">Matemática</option>
+                                                <option value="Português">Português</option>
+                                                <option value="História">História</option>
+                                                <option value="Geografia">Geografia</option>
+                                                <option value="Ciências">Ciências</option>
+                                                <option value="Inglês">Inglês</option>
+                                                <option value="Arte">Arte</option>
+                                                <option value="Educação Física">Educação Física</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="serie" class="form-label">
+                                                <strong>Série *</strong>
+                                            </label>
+                                            <select class="form-select" id="serie" name="serie" required>
+                                                <option value="">Selecione uma série</option>
+                                                <option value="6º Ano">6º Ano</option>
+                                                <option value="7º Ano">7º Ano</option>
+                                                <option value="8º Ano">8º Ano</option>
+                                                <option value="9º Ano">9º Ano</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="descricao" class="form-label">
+                                        <strong>Descrição da Aula *</strong>
+                                    </label>
+                                    <textarea class="form-control" id="descricao" name="descricao" rows="4" 
+                                              placeholder="Descreva o conteúdo da aula, objetivos de aprendizagem e conceitos principais..." required></textarea>
+                                    <div class="form-text">Descrição detalhada do que será abordado na aula</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="link_video" class="form-label">
+                                        <strong>Link do Vídeo</strong>
+                                    </label>
+                                    <input type="url" class="form-control" id="link_video" name="link_video" 
+                                           placeholder="https://www.youtube.com/watch?v=... ou https://vimeo.com/...">
+                                    <div class="form-text">Link para vídeo da aula (YouTube, Vimeo, etc.)</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="objetivos" class="form-label">
+                                                <strong>Objetivos de Aprendizagem</strong>
+                                            </label>
+                                            <textarea class="form-control" id="objetivos" name="objetivos" rows="3" 
+                                                      placeholder="O que o aluno deve aprender ao final desta aula..."></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="prerequisitos" class="form-label">
+                                                <strong>Pré-requisitos</strong>
+                                            </label>
+                                            <textarea class="form-control" id="prerequisitos" name="prerequisitos" rows="3" 
+                                                      placeholder="Conhecimentos necessários para esta aula..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="salvarRascunho()">
+                                        <i class="fas fa-save me-2"></i>Salvar como Rascunho
+                                    </button>
+                                    <div>
+                                        <a href="{{ url_for('professor_aulas') }}" class="btn btn-secondary me-2">
+                                            <i class="fas fa-times me-2"></i>Cancelar
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-check me-2"></i>Criar Aula
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dicas de Criação -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="m-0">
+                                <i class="fas fa-lightbulb me-2"></i>Dicas para Criar uma Boa Aula
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-bullseye text-primary me-2"></i>Objetivos Claros</h6>
+                                    <p class="small text-muted">Defina claramente o que o aluno deve aprender ao final da aula.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-video text-success me-2"></i>Vídeo de Qualidade</h6>
+                                    <p class="small text-muted">Use vídeos curtos e objetivos para manter o engajamento.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-tasks text-warning me-2"></i>Exercícios Práticos</h6>
+                                    <p class="small text-muted">Crie exercícios que reforcem o conteúdo aprendido.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        border-radius: 0.375rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sidebar .nav-link.active {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .btn {
+        border-radius: 0.375rem;
+    }
+</style>
+
+<script>
+function salvarRascunho() {
+    // Implementar funcionalidade de rascunho
+    alert('Funcionalidade de rascunho será implementada em breve!');
+}
+
+// Validação do formulário
+document.getElementById('form-aula').addEventListener('submit', function(e) {
+    const titulo = document.getElementById('titulo').value.trim();
+    const descricao = document.getElementById('descricao').value.trim();
+    const disciplina = document.getElementById('disciplina').value;
+    const serie = document.getElementById('serie').value;
+    
+    if (!titulo || !descricao || !disciplina || !serie) {
+        e.preventDefault();
+        alert('Por favor, preencha todos os campos obrigatórios.');
+        return false;
+    }
+    
+    if (titulo.length < 10) {
+        e.preventDefault();
+        alert('O título deve ter pelo menos 10 caracteres.');
+        return false;
+    }
+    
+    if (descricao.length < 30) {
+        e.preventDefault();
+        alert('A descrição deve ter pelo menos 30 caracteres.');
+        return false;
+    }
+    
+    return true;
+});
+
+// Contador de caracteres para descrição
+document.getElementById('descricao').addEventListener('input', function() {
+    const maxLength = 1000;
+    const currentLength = this.value.length;
+    const remaining = maxLength - currentLength;
+    
+    if (remaining < 0) {
+        this.value = this.value.substring(0, maxLength);
+    }
+});
+</script>
+{% endblock %}

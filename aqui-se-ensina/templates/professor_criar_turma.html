@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Nova Turma{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Criar Nova Turma
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">
+                                <i class="fas fa-graduation-cap me-2"></i>
+                                Nome da Turma *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="nome" 
+                                   name="nome" 
+                                   required 
+                                   placeholder="Ex: Matemática 6º Ano A">
+                            <div class="form-text">Nome único e descritivo para identificar a turma</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Descrição
+                            </label>
+                            <textarea class="form-control" 
+                                      id="descricao" 
+                                      name="descricao" 
+                                      rows="3" 
+                                      placeholder="Descreva o objetivo e conteúdo da turma"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="capacidade_maxima" class="form-label">
+                                        <i class="fas fa-users me-2"></i>
+                                        Capacidade Máxima
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="capacidade_maxima" 
+                                           name="capacidade_maxima" 
+                                           min="1" 
+                                           max="100" 
+                                           placeholder="Ex: 30">
+                                    <div class="form-text">Número máximo de alunos permitidos</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="data_inicio" class="form-label">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        Data de Início
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control" 
+                                           id="data_inicio" 
+                                           name="data_inicio">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="data_fim" class="form-label">
+                                <i class="fas fa-calendar-check me-2"></i>
+                                Data de Fim (Opcional)
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="data_fim" 
+                                   name="data_fim">
+                            <div class="form-text">Data prevista para conclusão da turma</div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('professor_turmas') }}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Criar Turma
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dicas para criar uma boa turma -->
+            <div class="card mt-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Dicas para criar uma boa turma
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Nome claro:</strong> Use nomes que identifiquem facilmente o conteúdo e nível</li>
+                        <li><strong>Descrição detalhada:</strong> Explique o que os alunos aprenderão</li>
+                        <li><strong>Capacidade adequada:</strong> Considere o tempo disponível para dar atenção individual</li>
+                        <li><strong>Datas realistas:</strong> Defina prazos que permitam um aprendizado efetivo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validação do formulário
+document.querySelector('form').addEventListener('submit', function(e) {
+    const nome = document.getElementById('nome').value.trim();
+    const dataInicio = document.getElementById('data_inicio').value;
+    const dataFim = document.getElementById('data_fim').value;
+    
+    if (!nome) {
+        e.preventDefault();
+        alert('Por favor, preencha o nome da turma');
+        return;
+    }
+    
+    if (dataInicio && dataFim && dataInicio > dataFim) {
+        e.preventDefault();
+        alert('A data de início não pode ser posterior à data de fim');
+        return;
+    }
+});
+</script>
+{% endblock %}

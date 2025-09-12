@@ -1,0 +1,16 @@
+# Dependências para Fly.io
+# Versões otimizadas para produção
+
+Flask==2.3.3
+Flask-Login==0.6.3
+Flask-RESTful==0.3.10
+Flask-Swagger-UI==4.11.1
+python-dotenv==1.0.0
+Werkzeug==2.3.7
+gunicorn==21.2.0
+psycopg[binary]==3.2.9
+
+# Dependências adicionais para produção
+# (opcional, apenas se necessário)
+# redis==4.6.0
+# celery==5.3.0
